@@ -1,0 +1,35 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Copyright © 2018 Overdose.digital. All rights reserved.
+ */
+-->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
+    <type name="Laybuy\Laybuy\Model\Logger\Handler">
+        <arguments>
+            <argument name="filesystem" xsi:type="object">Magento\Framework\Filesystem\Driver\File</argument>
+        </arguments>
+    </type>
+    <type name="Magento\Checkout\Model\CompositeConfigProvider">
+        <arguments>
+            <argument name="configProviders" xsi:type="array">
+                <item name="laybuy_laybuy_config_provider" xsi:type="object">Laybuy\Laybuy\Model\LaybuyPaymentConfigProvider</item>
+            </argument>
+        </arguments>
+    </type>
+    <type name="Laybuy\Laybuy\Model\Logger\Logger">
+        <arguments>
+            <argument name="name" xsi:type="string">Laybuy</argument>
+            <argument name="logger" xsi:type="object">laybuyLoggerInterface</argument>
+            <argument name="config" xsi:type="object">Laybuy\Laybuy\Model\Config</argument>
+        </arguments>
+    </type>
+    <virtualType name="laybuyLoggerInterface" type="Magento\Framework\Logger\Monolog">
+        <arguments>
+            <argument name="name" xsi:type="string">Laybuy Logger</argument>
+            <argument name="handlers" xsi:type="array">
+                <item name="system" xsi:type="object">Laybuy\Laybuy\Model\Logger\Handler</item>
+            </argument>
+        </arguments>
+    </virtualType>
+</config>

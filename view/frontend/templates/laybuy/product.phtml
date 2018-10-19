@@ -1,0 +1,86 @@
+<?php
+/**
+ * @var $block \Overdose\Laybuy\Block\Catalog\Installments
+ */
+?>
+<?php if ($block->canShow()) : ?>
+    <div class="laybuy-installments laybuy-installments-amount"><?php echo __('or 6 interest-free payments of <strong>%1</strong> with', $block->getInstallmentsAmount())?>
+        <img src="<?php echo $block->getViewFileUrl('Laybuy_Laybuy::images/laybuy_logo_grape.svg'); ?>"/>
+        <a class="laybuy-modal-popup-trigger" href="#"><span class="icon icon-info"></span></a>
+    </div>
+    <div id="laybuy-modal-popup">
+        <div class="laybuy-content-wrapper">
+            <h2 class="laybuy-title"><?php echo __('Laybuy'); ?></h2>
+            <div class="laybuy-content">
+                <p><?php echo __('Simply select Pay by Laybuy at checkout.') ?></p>
+                <p><?php echo __('Returning customers only need to confirm the order to complete the purchase.') ?></p>
+                <p><?php echo __('New customers can sign up at checkout and start using Laybuy today.') ?></p>
+                <p><?php echo __('Your order is processed immediately and your payment schedule is established.') ?></p>
+                <p><?php echo __('Only a sixth is due today and the rest is split over 5 weekly automatic payments on the day of the original purchase.') ?></p>
+            </div>
+            <div class="laybuy-steps">
+                <div class="laybuy-step">
+                    <div class="icon-wrapper">
+                        <img src="<?php echo $block->getViewFileUrl('Laybuy_Laybuy::images/popup-icons/laybuy-cart.png') ?>" alt="<?php echo __('Laybuy logo') ?>" class="step-icon">
+                    </div>
+                    <div class="laybuy-step-content">
+                        <p><?php echo __('Simply select <b>Pay by Laybuy</b> at checkout') ?></p>
+                    </div>
+                </div>
+                <div class="laybuy-step">
+                    <div class="icon-wrapper">
+                        <img src="<?php echo $block->getViewFileUrl('Laybuy_Laybuy::images/popup-icons/laybuy-mobile.png') ?>" alt="<?php echo __('Laybuy logo') ?>" class="step-icon">
+                    </div>
+                    <div class="laybuy-step-content">
+                        <p><?php echo __('Login or Register for Laybuy and complete your order in seconds') ?></p>
+                    </div>
+                </div>
+                <div class="laybuy-step">
+                    <div class="icon-wrapper">
+                        <img src="<?php echo $block->getViewFileUrl('Laybuy_Laybuy::images/popup-icons/laybuy-cc.png') ?>" alt="<?php echo __('Laybuy logo') ?>" class="step-icon">
+                    </div>
+                    <div class="laybuy-step-content">
+                        <p><?php echo __('Complete your purchase using an existing debit or credit card') ?></p>
+                    </div>
+                </div>
+                <div class="laybuy-step">
+                    <div class="icon-wrapper">
+                        <img src="<?php echo $block->getViewFileUrl('Laybuy_Laybuy::images/popup-icons/laybuy-laybuy.png') ?>" alt="<?php echo __('Laybuy logo') ?>" class="step-icon">
+                    </div>
+                    <div class="laybuy-step-content">
+                        <p><?php echo __('Pay over 6 weeks and receive your purchase now') ?></p>
+                    </div>
+                </div>
+            </div>
+            <div class="laybuy-logo-bottom">
+                <img src="<?php echo $block->getViewFileUrl('Laybuy_Laybuy::images/laybuy_logo_grape.svg') ?>" alt="<?php echo __('Laybuy logo') ?>">
+            </div>
+        </div>
+    </div>
+    <script>
+        require(
+            [
+                'jquery',
+                'Magento_Ui/js/modal/modal'
+            ],
+            function(
+                $,
+                modal
+            ) {
+                var options = {
+                    responsive: true,
+                    innerScroll: false,
+                    clickableOverlay: true,
+                    modalClass: 'laybuy-learn-more',
+                    buttons: []
+                };
+
+                var popup = modal(options, $('#laybuy-modal-popup'));
+
+                $( ".laybuy-modal-popup-trigger" ).on( "click", function() {
+                    $('#laybuy-modal-popup').modal('openModal');
+                });
+            }
+        );
+    </script>
+<?php endif; ?>

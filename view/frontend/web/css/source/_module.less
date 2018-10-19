@@ -1,0 +1,85 @@
+& when (@media-common = true) {
+  #laybuy-modal-popup {
+    display: none;
+
+    .laybuy-content-wrapper {
+      .laybuy-title {
+        font-weight: bold;
+        text-transform: initial;
+        text-align: center;
+      }
+      .laybuy-content {
+        p {
+          line-height: 2em;
+        }
+      }
+
+      .laybuy-steps {
+        display: flex;
+        position: relative;
+        justify-content: space-around;
+        margin-top: 50px;
+        padding-top: 50px;
+
+        .laybuy-step {
+          width: 25%;
+        }
+
+        &:before {
+          content: '';
+          position: absolute;
+          top: 0;
+          width: 100%;
+          height: 1px;
+          background-color: #cccccc;
+        }
+
+        .icon-wrapper {
+          text-align: center;
+          .step-icon {
+            max-width: 45px;
+            margin-bottom: 25px;
+          }
+        }
+        .laybuy-step-content {
+          text-align: center;
+        }
+      }
+    }
+
+    .laybuy-logo-bottom {
+      margin-top: 75px;
+      margin-bottom: 25px;
+      text-align: center;
+      img {
+        max-width: 200px;
+      }
+    }
+  }
+
+  .laybuy-installments-amount {
+    position: relative;
+    line-height: 1.4;
+    img {
+      position: relative;
+      top: 3px;
+      max-height: 16px;
+    }
+
+    .icon.icon-info {
+      .lib-icon-font(
+        @_icon-font-content: @icon-info,
+        @_icon-font-position: after,
+        @_icon-font-display: inline-block,
+        @_icon-font-color: black
+      );
+    }
+  }
+}
+
+//
+//    Mobile @screen__m
+//--------------------------------------
+.media-width(@extremum, @break) when (@extremum = 'max') and (@break = @screen__m) {
+
+}

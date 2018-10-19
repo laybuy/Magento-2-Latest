@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Copyright © 2018 Overdose.digital. All rights reserved.
+ */
+-->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Store:etc/config.xsd">
+    <default>
+        <payment>
+            <laybuy_payment>
+                <active>0</active>
+                <sandbox>1</sandbox>
+                <payment_action>authorize_capture</payment_action>
+                <transfer_line_items>0</transfer_line_items>
+                <merchant_id />
+                <merchant_api_key />
+                <min_order_total>10</min_order_total>
+                <max_order_total>5000</max_order_total>
+                <model>Laybuy\Laybuy\Model\Laybuy</model>
+                <title>LayBuy Payment</title>
+            </laybuy_payment>
+        </payment>
+    </default>
+</config>
