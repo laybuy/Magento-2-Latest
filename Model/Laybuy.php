@@ -82,7 +82,7 @@ class Laybuy extends \Magento\Payment\Model\Method\AbstractMethod
     /**
      * @var array
      */
-    protected $_supportedCurrencyCodes = ['NZD', 'AUD'];
+    protected $_supportedCurrencyCodes = ['NZD', 'AUD', 'GBP'];
 
     /**
      * @var \Magento\Framework\View\Asset\Repository
@@ -450,6 +450,13 @@ class Laybuy extends \Magento\Payment\Model\Method\AbstractMethod
 
         $laybuyOrder->amount = number_format($quote->getGrandTotal(), 2, '.', '');
         $laybuyOrder->currency = $quote->getCurrency()->getQuoteCurrencyCode();
+
+        if ($quote->getQuoteCurrencyCode() == 'GBP') {
+            $totals = $quote->getTotals();
+            if (isset($totals['tax']) && $totals['tax']->getValue()) {
+                $laybuyOrder->tax = number_format($totals['tax']->getValue(), 2, '.', '');
+            }
+        }
 
         if (!in_array($laybuyOrder->currency, $this->_supportedCurrencyCodes)) {
             throw new \LogicException('Laybuy doesn\'t support your currency');

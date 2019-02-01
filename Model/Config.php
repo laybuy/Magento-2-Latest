@@ -52,6 +52,8 @@ class Config extends ParentConfig
 
     const LAYBUY_CANCELLED = 'CANCELLED';
 
+    const SUPPORTED_CURRENCY_CODES = ['NZD', 'AUD', 'GBP'];
+
     /**
      * @var EncryptorInterface
      */

@@ -66,7 +66,7 @@ class Installments extends Template
      */
     public function canShow()
     {
-        if (!$this->laybuyConfig->isActive()) {
+        if (!$this->laybuyConfig->isActive()  || !in_array($this->_storeManager->getStore()->getCurrentCurrency()->getCode(), \Laybuy\Laybuy\Model\Config::SUPPORTED_CURRENCY_CODES)) {
             return false;
         }
 
@@ -83,7 +83,7 @@ class Installments extends Template
         $product = $this->registry->registry('product');
 
         if ($price = $product->getFinalPrice()) {
-            return $this->currency->getCurrencySymbol() . number_format($price / 6, 2);
+            return $this->_storeManager->getStore()->getCurrentCurrency()->getCurrencySymbol() . number_format($price / 6, 2);
         }
     }
 
