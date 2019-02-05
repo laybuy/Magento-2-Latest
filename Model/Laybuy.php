@@ -2,6 +2,7 @@
 
 namespace Laybuy\Laybuy\Model;
 
+use Magento\Framework\Exception\LocalizedException;
 use \Magento\Sales\Model\Order\Payment\Transaction\BuilderInterface;
 use Laybuy\Laybuy\Model\Config as LaybuyConfig;
 
@@ -83,6 +84,11 @@ class Laybuy extends \Magento\Payment\Model\Method\AbstractMethod
      * @var array
      */
     protected $_supportedCurrencyCodes = ['NZD', 'AUD', 'GBP'];
+
+    /**
+     * @var bool
+     */
+    protected $_canRefund = false;
 
     /**
      * @var \Magento\Framework\View\Asset\Repository
@@ -544,6 +550,30 @@ class Laybuy extends \Magento\Payment\Model\Method\AbstractMethod
         }
 
         return true;
+    }
+
+    /**
+     * @param \Magento\Payment\Model\InfoInterface $payment
+     * @param float $amount
+     * @return $this
+     */
+    public function refund(\Magento\Payment\Model\InfoInterface $payment, $amount)
+    {
+
+        // Laybuy module stores remote order reference as <orderId>_<token>, so we need to split it out for the refund request.
+        $lastTransId = $payment->getPayment()->getLastTransId();
+
+        list($orderId, $token) = explode('_', $lastTransId);
+
+        $refundDetails = [
+            'orderId' => $orderId,
+            'amount' => (float)$amount,
+            'refundReference' => 'CNZ-102748', //TODO: populate from creditmemo incrementID
+            'note' => 'Refunded Online (MDC)'
+        ];
+        $this->logger->debug([__METHOD__ . 'LAYBUY ORDER:' => $refundDetails['orderId']]);
+        $this->httpClient->refundLaybuyOrder($refundDetails);
+        return $this;
     }
 }
 
