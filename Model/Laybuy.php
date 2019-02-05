@@ -88,7 +88,7 @@ class Laybuy extends \Magento\Payment\Model\Method\AbstractMethod
     /**
      * @var bool
      */
-    protected $_canRefund = false;
+    protected $_canRefund = true;
 
     /**
      * @var \Magento\Framework\View\Asset\Repository
