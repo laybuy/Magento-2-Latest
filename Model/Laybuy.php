@@ -2,7 +2,6 @@
 
 namespace Laybuy\Laybuy\Model;
 
-use Magento\Framework\Exception\LocalizedException;
 use \Magento\Sales\Model\Order\Payment\Transaction\BuilderInterface;
 use Laybuy\Laybuy\Model\Config as LaybuyConfig;
 
