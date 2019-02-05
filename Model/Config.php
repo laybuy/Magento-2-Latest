@@ -54,6 +54,8 @@ class Config extends ParentConfig
 
     const LAYBUY_CANCELLED = 'CANCELLED';
 
+    const LAYBUY_FIELD_REFERENCE_ORDER_ID = 'Reference Order Id';
+
     const SUPPORTED_CURRENCY_CODES = ['NZD', 'AUD', 'GBP'];
 
     /**

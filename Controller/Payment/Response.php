@@ -71,7 +71,7 @@ class Response extends Action
                 if ($laybuyStatus == LaybuyConfig::LAYBUY_SUCCESS) {
                     if ($laybuyOrderId = $this->laybuy->laybuyConfirm($token)) {
                         $quote = $this->checkoutSession->getQuote();
-                        $quote->getPayment()->setAdditionalInformation('Reference Order Id', $laybuyOrderId);
+                        $quote->getPayment()->setAdditionalInformation(LaybuyConfig::LAYBUY_FIELD_REFERENCE_ORDER_ID, $laybuyOrderId);
                         $quote->getPayment()->setAdditionalInformation('Token', $token);
 
                         $this->checkoutSession

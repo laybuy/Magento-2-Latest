@@ -561,16 +561,18 @@ class Laybuy extends \Magento\Payment\Model\Method\AbstractMethod
     {
 
         // Laybuy module stores remote order reference as <orderId>_<token>, so we need to split it out for the refund request.
-        $lastTransId = $payment->getPayment()->getLastTransId();
+        $laybuyOrderId = $payment->getAdditionalInformation(Config::LAYBUY_FIELD_REFERENCE_ORDER_ID);
 
-        list($orderId, $token) = explode('_', $lastTransId);
+        if (!$laybuyOrderId) {
+            $this->logger->debug(['Unable to process refund, payment details are missing: ' . $payment->getOrderId()]);
+        }
 
         $refundDetails = [
-            'orderId' => $orderId,
+            'orderId' => $laybuyOrderId,
             'amount' => (float)$amount,
-            'refundReference' => 'CNZ-102748', //TODO: populate from creditmemo incrementID
-            'note' => 'Refunded Online (MDC)'
+            'refundReference' => $payment->getCreditMemo()->getIncrementId()
         ];
+
         $this->logger->debug([__METHOD__ . 'LAYBUY ORDER:' => $refundDetails['orderId']]);
         $this->httpClient->refundLaybuyOrder($refundDetails);
         return $this;

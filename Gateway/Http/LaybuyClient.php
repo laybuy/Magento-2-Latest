@@ -153,7 +153,7 @@ class LaybuyClient
      */
     public function refundLaybuyOrder($refundDetails)
     {
-        $response = $this->restClient->restPost(Config::API_ORDER_REFUND, $refundDetails);
+        $response = $this->restClient->restPost(Config::API_ORDER_REFUND, json_encode($refundDetails));
 
         $body = json_decode($response->getBody());
 
