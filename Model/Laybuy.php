@@ -566,13 +566,20 @@ class Laybuy extends \Magento\Payment\Model\Method\AbstractMethod
             $this->logger->debug(['Unable to process refund, payment details are missing: ' . $payment->getOrderId()]);
         }
 
+        // Mandatory fields
         $refundDetails = [
             'orderId' => $laybuyOrderId,
             'amount' => (float)$amount,
-            'refundReference' => $payment->getCreditMemo()->getIncrementId()
         ];
 
+        if ($payment->getCreditmemo() instanceof \Magento\Sales\Api\Data\CreditmemoInterface
+            && $payment->getCreditmemo()->getIncrementId()) {
+            // Optional, so only add this if a creditmemo has been attached.
+            $refundDetails['refundReference'] = $payment->getCreditmemo()->getIncrementId();
+        }
+
         $this->logger->debug([__METHOD__ . 'LAYBUY ORDER:' => $refundDetails['orderId']]);
+
         $this->httpClient->refundLaybuyOrder($refundDetails);
         return $this;
     }
