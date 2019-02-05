@@ -149,6 +149,7 @@ class LaybuyClient
 
     /**
      * @param array $refundDetails
+     * @return integer
      * @throws LocalizedException
      */
     public function refundLaybuyOrder($refundDetails)
@@ -161,5 +162,7 @@ class LaybuyClient
             $this->logger->debug(['Error while processing refund: ' . $response->getBody()]);
             throw new LocalizedException(__('Unable to process refund.'));
         }
+
+        return $body->refundId;
     }
 }
