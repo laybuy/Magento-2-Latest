@@ -18,6 +18,7 @@
                 <max_order_total>5000</max_order_total>
                 <model>Laybuy\Laybuy\Model\Laybuy</model>
                 <title>LayBuy Payment</title>
+                <debug>1</debug>
             </laybuy_payment>
         </payment>
     </default>
