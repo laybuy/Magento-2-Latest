@@ -33,7 +33,8 @@ class LaybuyPaymentConfigProvider implements ConfigProviderInterface
                 'laybuy_payment' => [
                     'isActive' => $this->laybuyModel->isActive(),
                     'paymentAction' => $this->laybuyModel->getConfigPaymentAction(),
-                    'logoSrc' => $this->laybuyModel->getLaybuyLogoSrc()
+                    'logoSrc' => $this->laybuyModel->getLaybuyLogoSrc(),
+                    'laybuyProcessUrl' => $this->laybuyModel->getLaybuyProcessUrl()
                 ]
             ]
         ];

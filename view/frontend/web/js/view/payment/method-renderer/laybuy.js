@@ -7,8 +7,9 @@ define([
     'Magento_Customer/js/customer-data',
     'Magento_Customer/js/model/customer',
     'Magento_Checkout/js/model/payment/additional-validators',
-    'Magento_Checkout/js/action/redirect-on-success'
-], function ($, Component, quote, setPaymentMethodAction, customerData, customer, additionalValidators, redirectOnSuccessAction) {
+    'Magento_Checkout/js/action/redirect-on-success',
+    'mage/url'
+], function ($, Component, quote, setPaymentMethodAction, customerData, customer, additionalValidators, redirectOnSuccessAction, url) {
     'use strict';
 
     return Component.extend({
@@ -51,9 +52,9 @@ define([
              * Checkout for guest and registered customer.
              */
             if (!customer.isLoggedIn()) {
-                laybuyUrl = '/laybuy/payment/process/guest-email/' + quote.guestEmail;
+                laybuyUrl = window.checkoutConfig.payment['laybuy_payment'].laybuyProcessUrl + 'guest-email/' + quote.guestEmail;
             } else {
-                laybuyUrl = '/laybuy/payment/process/';
+                laybuyUrl = window.checkoutConfig.payment['laybuy_payment'].laybuyProcessUrl;
             }
 
             $.ajax({

@@ -259,6 +259,7 @@ class Laybuy extends \Magento\Payment\Model\Method\AbstractMethod
             if ($this->getConfigPaymentAction() == self::ACTION_AUTHORIZE_CAPTURE) {
                 $payment = $quote->getPayment();
                 $payment->setMethod(LaybuyConfig::CODE);
+                $payment->setAdditionalInformation('laybuy_grand_total', $quote->getGrandTotal());
             }
 
             $this->quoteValidator->validateBeforeSubmit($quote);
@@ -420,6 +421,15 @@ class Laybuy extends \Magento\Payment\Model\Method\AbstractMethod
         $payment->setTransactionId($txnId);
         $payment->setAdditionalInformation('laybuy_order_id', $txnId);
         $payment->save();
+    }
+
+    /**
+     *  Returns laybuy process url for checkout configuration
+     * @return string
+     */
+    public function getLaybuyProcessUrl()
+    {
+       return $this->_urlBuilder->getUrl('laybuy/payment/process');
     }
 
     /**
