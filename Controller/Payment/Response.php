@@ -170,6 +170,8 @@ class Response extends Action
             $this->logger->debug(['process error ' => $e->getTraceAsString()]);
             $this->messageManager->addExceptionMessage($e, $e->getMessage());
 
+            $order = $this->checkoutSession->getLastRealOrder();
+            
             if (!$order->getId()) {
                 $this->laybuy->laybuyCancel($token);
             }
