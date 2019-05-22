@@ -4,7 +4,7 @@
  */
 ?>
 <?php if ($block->canShow()) : ?>
-    <div class="laybuy-installments laybuy-installments-amount"><?php echo __('or 6 interest-free payments of <strong>%1</strong> with', $block->getInstallmentsAmount())?>
+    <div class="laybuy-installments laybuy-installments-amount"><span class="installments-amount"><?php echo __('or 6 interest-free payments of <strong>%1</strong> with', $block->getInstallmentsAmount())?></span>
         <img src="<?php echo $block->getViewFileUrl('Laybuy_Laybuy::images/laybuy_logo_grape.svg'); ?>"/>
         <a class="laybuy-modal-popup-trigger" href="#"><span class="icon icon-info"></span></a>
     </div>
@@ -61,12 +61,24 @@
         require(
             [
                 'jquery',
+                'Magento_Catalog/js/price-utils',
                 'Magento_Ui/js/modal/modal'
             ],
             function(
                 $,
+                utils,
                 modal
             ) {
+                $(document).on('updatePrice', function(e){
+                    e.target.innerText.match(/[0-9 , \.]+/g).some(function(el) {
+                        let val;
+                        if(val = parseFloat(el)) {
+                            $('.laybuy-installments-amount span.installments-amount').html('or 6 interest free payments of <strong>'+ utils.formatPrice(val/6, {}) +'</strong> with');
+                            return;
+                        }
+                    });
+                });
+
                 var options = {
                     responsive: true,
                     innerScroll: false,
