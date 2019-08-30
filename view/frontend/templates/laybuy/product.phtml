@@ -72,7 +72,7 @@
                 $(document).on('updatePrice', function(e){
                     e.target.innerText.match(/[0-9 , \.]+/g).some(function(el) {
                         let val;
-                        if(val = parseFloat(el)) {
+                        if(val = parseFloat(el.replace(',', ''))) {
                             $('.laybuy-installments-amount span.installments-amount').html('or 6 interest free payments of <strong>'+ utils.formatPrice(val/6, {}) +'</strong> with');
                             return;
                         }
