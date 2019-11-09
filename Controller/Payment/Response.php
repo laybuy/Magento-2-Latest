@@ -86,6 +86,8 @@ class Response extends Action
 
                         if ($orderId && $order) {
 
+                            $txnId = $laybuyOrderId . '_' . $token;
+                            $this->laybuy->addTransactionId($order,$txnId);
                             $this->laybuy->sendOrderEmail($order);
 
                             $this->logger->debug([

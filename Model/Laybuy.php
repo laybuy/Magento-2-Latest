@@ -555,6 +555,32 @@ class Laybuy extends \Magento\Payment\Model\Method\AbstractMethod
 
         return true;
     }
+
+    /**
+     * @param \Magento\Sales\Model\Order $order
+     * @param $txnId
+     * @return bool
+     */
+    public function addTransactionId(\Magento\Sales\Model\Order $order,$txnId)
+    {
+        if(!$order->hasInvoices())
+        {
+            return false;
+        }
+
+        foreach($order->getInvoiceCollection() as $invoice)
+        {
+            $invoice->setTransactionId($txnId);
+            $invoice->save();
+
+             $this->logger->debug([
+                'Invoice Id ' => $invoice->getId(),
+                'Transaction Id ' => $invoice->getTransactionId()
+            ]);
+        }
+
+        return true;
+    }
 }
 
 
