@@ -385,11 +385,11 @@ class Laybuy extends \Magento\Payment\Model\Method\AbstractMethod
 
     /**
      * @param \Magento\Sales\Model\Order $order
-     * @param $orderId
+     * @param $txnId
      * @throws \Exception
      * @throws \Magento\Framework\Exception\LocalizedException
      */
-    public function createInvoiceAndUpdateOrder(\Magento\Sales\Model\Order $order, $orderId, $laybuyOrderId)
+    public function createInvoiceAndUpdateOrder(\Magento\Sales\Model\Order $order, $txnId, $laybuyOrderId)
     {
 
         $order->setState(\Magento\Sales\Model\Order::STATE_PROCESSING)
@@ -399,6 +399,7 @@ class Laybuy extends \Magento\Payment\Model\Method\AbstractMethod
 
         $invoice = $this->invoiceService->prepareInvoice($order);
         $invoice->setRequestedCaptureCase(\Magento\Sales\Model\Order\Invoice::CAPTURE_ONLINE);
+        $invoice->setTransactionId($txnId);
         $invoice->register();
 
         /** @var \Magento\Framework\DB\Transaction $transaction */
