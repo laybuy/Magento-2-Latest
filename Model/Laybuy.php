@@ -51,8 +51,15 @@ class Laybuy extends \Magento\Payment\Model\Method\AbstractMethod
      */
     protected $logger;
 
-
+    /**
+     * @var \Magento\Sales\Model\Order\Email\Sender\OrderSender
+     */
     protected $orderSender;
+
+    /**
+     * @var \Magento\Sales\Model\Order\Email\Sender\InvoiceSender
+     */
+    protected $invoiceSender;
 
     /**
      * @var \Magento\Sales\Model\Order\Config
@@ -105,6 +112,7 @@ class Laybuy extends \Magento\Payment\Model\Method\AbstractMethod
      * @param \Magento\Framework\DB\TransactionFactory $transactionFactory
      * @param \Magento\Sales\Model\Service\InvoiceService $invoiceService
      * @param \Magento\Sales\Model\Order\Email\Sender\OrderSender $orderSender
+     * @param \Magento\Sales\Model\Order\Email\Sender\InvoiceSender $invoiceSender
      * @param \Magento\Sales\Model\Order\Config $salesOrderConfig
      * @param \Magento\Checkout\Model\Session $checkoutSession
      * @param \Magento\Framework\Exception\LocalizedExceptionFactory $exception
@@ -130,6 +138,7 @@ class Laybuy extends \Magento\Payment\Model\Method\AbstractMethod
         \Magento\Framework\DB\TransactionFactory $transactionFactory,
         \Magento\Sales\Model\Service\InvoiceService $invoiceService,
         \Magento\Sales\Model\Order\Email\Sender\OrderSender $orderSender,
+        \Magento\Sales\Model\Order\Email\Sender\InvoiceSender $invoiceSender,
         \Magento\Sales\Model\Order\Config $salesOrderConfig,
         \Magento\Checkout\Model\Session $checkoutSession,
         \Magento\Framework\Exception\LocalizedExceptionFactory $exception,
@@ -165,6 +174,7 @@ class Laybuy extends \Magento\Payment\Model\Method\AbstractMethod
         $this->logger = $logger;
         $this->salesOrderConfig = $salesOrderConfig;
         $this->orderSender = $orderSender;
+        $this->invoiceSender = $invoiceSender;
         $this->transactionFactory = $transactionFactory;
         $this->invoiceService = $invoiceService;
     }
@@ -378,6 +388,12 @@ class Laybuy extends \Magento\Payment\Model\Method\AbstractMethod
     {
         try {
             $this->orderSender->send($order);
+
+            if ($this->getConfigData('send_invoice_to_customer')) {
+                foreach ($order->getInvoiceCollection() as $invoice) {
+                    $this->invoiceSender->send($invoice);
+                }
+            }
         } catch (\Exception $e) {
             $this->_logger->critical($e);
         }
@@ -401,6 +417,9 @@ class Laybuy extends \Magento\Payment\Model\Method\AbstractMethod
         $invoice->setRequestedCaptureCase(\Magento\Sales\Model\Order\Invoice::CAPTURE_ONLINE);
         $invoice->register();
 
+        if($this->getConfigData('send_invoice_to_customer')) {
+            $this->invoiceSender->send($invoice);
+        }
         /** @var \Magento\Framework\DB\Transaction $transaction */
         $transaction = $this->transactionFactory->create();
         $transaction->addObject($order)
@@ -474,7 +493,7 @@ class Laybuy extends \Magento\Payment\Model\Method\AbstractMethod
 
         $laybuyOrder->returnUrl = $returnUrl;
 
-        $laybuyOrder->merchantReference = $quote->getReservedOrderId();
+        $laybuyOrder->merchantReference = $quote->getReservedOrderId() . '#12';
 
         $laybuyOrder->customer = new \stdClass();
         $laybuyOrder->customer->firstName = $address->getFirstname() ? $address->getFirstname() : $shAddress->getFirstname();
