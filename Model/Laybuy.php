@@ -92,6 +92,11 @@ class Laybuy extends \Magento\Payment\Model\Method\AbstractMethod
     protected $_supportedCurrencyCodes = ['NZD', 'AUD', 'GBP'];
 
     /**
+     * @var bool
+     */
+    protected $_canRefund = true;
+
+    /**
      * @var \Magento\Framework\View\Asset\Repository
      */
     protected $_assetRepo;
@@ -573,6 +578,43 @@ class Laybuy extends \Magento\Payment\Model\Method\AbstractMethod
         }
 
         return true;
+    }
+
+    /**
+     * @param \Magento\Payment\Model\InfoInterface $payment
+     * @param float $amount
+     * @return $this
+     */
+    public function refund(\Magento\Payment\Model\InfoInterface $payment, $amount)
+    {
+
+        // Laybuy module stores remote order reference as <orderId>_<token>, so we need to split it out for the refund request.
+        $laybuyOrderId = $payment->getAdditionalInformation(Config::LAYBUY_FIELD_REFERENCE_ORDER_ID);
+
+        if (!$laybuyOrderId) {
+            $this->logger->debug(['Unable to process refund, payment details are missing: ' . $payment->getId()]);
+            return $this;
+        }
+
+        // Mandatory fields
+        $refundDetails = [
+            'orderId' => $laybuyOrderId,
+            'amount' => (float)$amount
+        ];
+
+        if ($payment->getCreditmemo() instanceof \Magento\Sales\Api\Data\CreditmemoInterface
+            && $payment->getCreditmemo()->getIncrementId()) {
+            // Optional, so only add this if a creditmemo has been attached.
+            $refundDetails['refundReference'] = $payment->getCreditmemo()->getIncrementId();
+        }
+
+        $this->logger->debug([__METHOD__ . 'LAYBUY ORDER:' => $refundDetails['orderId']]);
+
+        $refundId = $this->httpClient->refundLaybuyOrder($refundDetails);
+        if ($refundId) {
+            $payment->setLastTransId($refundId);
+        }
+        return $this;
     }
 }
 

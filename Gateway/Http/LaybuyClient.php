@@ -4,6 +4,7 @@ namespace Laybuy\Laybuy\Gateway\Http;
 
 use Laybuy\Laybuy\Model\Config;
 use Laybuy\Laybuy\Model\Logger\Logger;
+use Magento\Framework\Exception\LocalizedException;
 
 /**
  * Class LaybuyClient
@@ -144,5 +145,24 @@ class LaybuyClient
         } catch (\Exception $e) {
             $this->restClient = false;
         }
+    }
+
+    /**
+     * @param array $refundDetails
+     * @return integer
+     * @throws LocalizedException
+     */
+    public function refundLaybuyOrder($refundDetails)
+    {
+        $response = $this->restClient->restPost(Config::API_ORDER_REFUND, json_encode($refundDetails));
+
+        $body = json_decode($response->getBody());
+
+        if (!$body->result === Config::LAYBUY_SUCCESS) {
+            $this->logger->debug(['Error while processing refund: ' . $response->getBody()]);
+            throw new LocalizedException(__('Unable to process refund.'));
+        }
+
+        return $body->refundId;
     }
 }
