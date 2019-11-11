@@ -70,8 +70,10 @@ class Response extends Action
             if ($this->laybuy->getConfigPaymentAction() == Laybuy::ACTION_AUTHORIZE_CAPTURE) {
                 if ($laybuyStatus == LaybuyConfig::LAYBUY_SUCCESS && $quote = $this->checkoutSession->getQuote()) {
                     if ($quote->getPayment()->getAdditionalInformation('laybuy_grand_total') == $quote->getGrandTotal() && $laybuyOrderId = $this->laybuy->laybuyConfirm($token)) {
-                        $quote->getPayment()->setAdditionalInformation('Reference Order Id', $laybuyOrderId);
-                        $quote->getPayment()->setAdditionalInformation('Token', $token);
+                        $quote->getPayment()->setAdditionalInformation(LaybuyConfig::LAYBUY_FIELD_REFERENCE_ORDER_ID, $laybuyOrderId);
+                        if($this->laybuy->getConfigData('store_token_data')) {
+                            $quote->getPayment()->setAdditionalInformation('Token', $token);
+                        }
 
                         $this->checkoutSession
                             ->setLastQuoteId($quote->getId())

@@ -46,11 +46,15 @@ class Config extends ParentConfig
 
     const API_ORDER_CANCEL = '/order/cancel';
 
+    const API_ORDER_REFUND = '/order/refund';
+
     const LAYBUY_SUCCESS = 'SUCCESS';
 
     const LAYBUY_FAILURE = 'ERROR';
 
     const LAYBUY_CANCELLED = 'CANCELLED';
+
+    const LAYBUY_FIELD_REFERENCE_ORDER_ID = 'Reference Order Id';
 
     const SUPPORTED_CURRENCY_CODES = ['NZD', 'AUD', 'GBP'];
 

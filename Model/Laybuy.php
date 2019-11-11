@@ -51,8 +51,15 @@ class Laybuy extends \Magento\Payment\Model\Method\AbstractMethod
      */
     protected $logger;
 
-
+    /**
+     * @var \Magento\Sales\Model\Order\Email\Sender\OrderSender
+     */
     protected $orderSender;
+
+    /**
+     * @var \Magento\Sales\Model\Order\Email\Sender\InvoiceSender
+     */
+    protected $invoiceSender;
 
     /**
      * @var \Magento\Sales\Model\Order\Config
@@ -85,6 +92,11 @@ class Laybuy extends \Magento\Payment\Model\Method\AbstractMethod
     protected $_supportedCurrencyCodes = ['NZD', 'AUD', 'GBP'];
 
     /**
+     * @var bool
+     */
+    protected $_canRefund = true;
+
+    /**
      * @var \Magento\Framework\View\Asset\Repository
      */
     protected $_assetRepo;
@@ -105,6 +117,7 @@ class Laybuy extends \Magento\Payment\Model\Method\AbstractMethod
      * @param \Magento\Framework\DB\TransactionFactory $transactionFactory
      * @param \Magento\Sales\Model\Service\InvoiceService $invoiceService
      * @param \Magento\Sales\Model\Order\Email\Sender\OrderSender $orderSender
+     * @param \Magento\Sales\Model\Order\Email\Sender\InvoiceSender $invoiceSender
      * @param \Magento\Sales\Model\Order\Config $salesOrderConfig
      * @param \Magento\Checkout\Model\Session $checkoutSession
      * @param \Magento\Framework\Exception\LocalizedExceptionFactory $exception
@@ -130,6 +143,7 @@ class Laybuy extends \Magento\Payment\Model\Method\AbstractMethod
         \Magento\Framework\DB\TransactionFactory $transactionFactory,
         \Magento\Sales\Model\Service\InvoiceService $invoiceService,
         \Magento\Sales\Model\Order\Email\Sender\OrderSender $orderSender,
+        \Magento\Sales\Model\Order\Email\Sender\InvoiceSender $invoiceSender,
         \Magento\Sales\Model\Order\Config $salesOrderConfig,
         \Magento\Checkout\Model\Session $checkoutSession,
         \Magento\Framework\Exception\LocalizedExceptionFactory $exception,
@@ -165,6 +179,7 @@ class Laybuy extends \Magento\Payment\Model\Method\AbstractMethod
         $this->logger = $logger;
         $this->salesOrderConfig = $salesOrderConfig;
         $this->orderSender = $orderSender;
+        $this->invoiceSender = $invoiceSender;
         $this->transactionFactory = $transactionFactory;
         $this->invoiceService = $invoiceService;
     }
@@ -378,6 +393,12 @@ class Laybuy extends \Magento\Payment\Model\Method\AbstractMethod
     {
         try {
             $this->orderSender->send($order);
+
+            if ($this->getConfigData('send_invoice_to_customer')) {
+                foreach ($order->getInvoiceCollection() as $invoice) {
+                    $this->invoiceSender->send($invoice);
+                }
+            }
         } catch (\Exception $e) {
             $this->_logger->critical($e);
         }
@@ -402,6 +423,9 @@ class Laybuy extends \Magento\Payment\Model\Method\AbstractMethod
         $invoice->setTransactionId($txnId);
         $invoice->register();
 
+        if($this->getConfigData('send_invoice_to_customer')) {
+            $this->invoiceSender->send($invoice);
+        }
         /** @var \Magento\Framework\DB\Transaction $transaction */
         $transaction = $this->transactionFactory->create();
         $transaction->addObject($order)
@@ -581,6 +605,43 @@ class Laybuy extends \Magento\Payment\Model\Method\AbstractMethod
         }
 
         return true;
+    }
+
+    /**
+     * @param \Magento\Payment\Model\InfoInterface $payment
+     * @param float $amount
+     * @return $this
+     */
+    public function refund(\Magento\Payment\Model\InfoInterface $payment, $amount)
+    {
+
+        // Laybuy module stores remote order reference as <orderId>_<token>, so we need to split it out for the refund request.
+        $laybuyOrderId = $payment->getAdditionalInformation(Config::LAYBUY_FIELD_REFERENCE_ORDER_ID);
+
+        if (!$laybuyOrderId) {
+            $this->logger->debug(['Unable to process refund, payment details are missing: ' . $payment->getId()]);
+            return $this;
+        }
+
+        // Mandatory fields
+        $refundDetails = [
+            'orderId' => $laybuyOrderId,
+            'amount' => (float)$amount
+        ];
+
+        if ($payment->getCreditmemo() instanceof \Magento\Sales\Api\Data\CreditmemoInterface
+            && $payment->getCreditmemo()->getIncrementId()) {
+            // Optional, so only add this if a creditmemo has been attached.
+            $refundDetails['refundReference'] = $payment->getCreditmemo()->getIncrementId();
+        }
+
+        $this->logger->debug([__METHOD__ . 'LAYBUY ORDER:' => $refundDetails['orderId']]);
+
+        $refundId = $this->httpClient->refundLaybuyOrder($refundDetails);
+        if ($refundId) {
+            $payment->setLastTransId($refundId);
+        }
+        return $this;
     }
 }
 

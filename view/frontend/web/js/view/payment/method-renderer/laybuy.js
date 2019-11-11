@@ -7,9 +7,11 @@ define([
     'Magento_Customer/js/customer-data',
     'Magento_Customer/js/model/customer',
     'Magento_Checkout/js/model/payment/additional-validators',
+    'Magento_Checkout/js/action/set-billing-address',
+    'Magento_Ui/js/model/messageList',
     'Magento_Checkout/js/action/redirect-on-success',
     'mage/url'
-], function ($, Component, quote, setPaymentMethodAction, customerData, customer, additionalValidators, redirectOnSuccessAction, url) {
+], function ($, Component, quote, setPaymentMethodAction, customerData, customer, additionalValidators, setBillingAddressAction, globalMessageList, redirectOnSuccessAction, url) {
     'use strict';
 
     return Component.extend({
@@ -56,6 +58,8 @@ define([
             } else {
                 laybuyUrl = window.checkoutConfig.payment['laybuy_payment'].laybuyProcessUrl;
             }
+
+            setBillingAddressAction(globalMessageList);
 
             $.ajax({
                 url: laybuyUrl,

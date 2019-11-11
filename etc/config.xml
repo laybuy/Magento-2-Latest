@@ -12,6 +12,8 @@
                 <sandbox>1</sandbox>
                 <payment_action>authorize_capture</payment_action>
                 <transfer_line_items>0</transfer_line_items>
+                <send_invoice_to_customer>0</send_invoice_to_customer>
+                <store_token_data>1</store_token_data>
                 <merchant_id />
                 <merchant_api_key />
                 <min_order_total>10</min_order_total>
