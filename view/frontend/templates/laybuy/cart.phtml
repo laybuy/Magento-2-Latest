@@ -3,8 +3,8 @@
  * @var $block \Overdose\Laybuy\Block\Catalog\Installments
  */
 ?>
-<?php if ($block->canShow() && $block->showIn('product')) : ?>
-    <div class="laybuy-installments laybuy-installments-amount"><span class="installments-amount"><?php echo __('or 6 interest-free payments of <strong>%1</strong> with', $block->getInstallmentsAmount())?></span>
+<?php if ($block->canShow() && $block->showIn('cart')) : ?>
+    <div class="laybuy-installments laybuy-installments-amount"><span class="installments-amount"><?php echo __('or 6 interest-free payments of <strong>%1</strong> with', $block->getCartInstallmentAmount())?></span>
         <img src="<?php echo $block->getLogo(); ?>"/>
         <a class="laybuy-modal-popup-trigger" href="#"><span class="icon icon-info"></span></a>
     </div>

@@ -36,6 +36,14 @@ class Config extends ParentConfig
 
     const KEY_API_KEY = 'merchant_api_key';
 
+    const KEY_SHOW_IN_PRODUCT_PAGE = 'show_in_product_page';
+
+    const KEY_SHOW_IN_CATEGORY_PAGE = 'show_in_category_page';
+
+    const KEY_SHOW_IN_CART_PAGE = 'show_in_cart_page';
+
+    const KEY_SHOW_FULL_LOGO = 'show_full_logo';
+
     const API_ENDPOINT_LIVE = 'https://api.laybuy.com';
 
     const API_ENDPOINT_SANDBOX = 'https://sandbox-api.laybuy.com';
@@ -57,6 +65,12 @@ class Config extends ParentConfig
     const LAYBUY_FIELD_REFERENCE_ORDER_ID = 'Reference Order Id';
 
     const SUPPORTED_CURRENCY_CODES = ['NZD', 'AUD', 'GBP'];
+
+    const FULL_LOGO = 'logo/full.svg';
+
+    const SMALL_LOGO = 'logo/small.svg';
+
+    const ASSET_URL = 'https://integration-assets.laybuy.com/magento1_laybuy/';
 
     /**
      * @var EncryptorInterface
@@ -100,6 +114,61 @@ class Config extends ParentConfig
     public function isActive()
     {
         return (bool)$this->getValue(self::KEY_ACTIVE, $this->getCurrentStore());
+    }
+
+    /**
+     * Get Show In Page Configuration
+     *
+     * @return bool
+     */
+    public function showInProductPage()
+    {
+        return (bool)$this->getValue(self::KEY_SHOW_IN_PRODUCT_PAGE, $this->getCurrentStore());
+    }
+
+    /**
+     * Get Show In Category Configuration
+     *
+     * @return bool
+     */
+    public function showInCategoryPage()
+    {
+        return (bool)$this->getValue(self::KEY_SHOW_IN_CATEGORY_PAGE, $this->getCurrentStore());
+    }
+
+    /**
+     * Get Show In Cart Configuration
+     *
+     * @return bool
+     */
+    public function showInCartPage()
+    {
+        return (bool)$this->getValue(self::KEY_SHOW_IN_CART_PAGE, $this->getCurrentStore());
+    }
+
+    /**
+     * Get Payment configuration status
+     *
+     * @return string
+     */
+    public function getLogo()
+    {
+        if((bool)$this->getValue(self::KEY_SHOW_FULL_LOGO, $this->getCurrentStore())){
+            return self::FULL_LOGO;
+        } else {
+            return self::SMALL_LOGO;
+        }
+
+    }
+
+    /**
+     * Get Image from CDN path
+     *
+     * @return string
+     */
+    public function getMagentoAssetUrl($imagePath)
+    {
+        return self::ASSET_URL.$imagePath;
     }
 
     /**

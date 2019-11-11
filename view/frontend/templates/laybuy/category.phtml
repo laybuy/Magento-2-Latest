@@ -3,11 +3,13 @@
  * @var $block \Overdose\Laybuy\Block\Catalog\Installments
  */
 ?>
-<?php if ($block->canShow() && $block->showIn('product')) : ?>
-    <div class="laybuy-installments laybuy-installments-amount"><span class="installments-amount"><?php echo __('or 6 interest-free payments of <strong>%1</strong> with', $block->getInstallmentsAmount())?></span>
-        <img src="<?php echo $block->getLogo(); ?>"/>
-        <a class="laybuy-modal-popup-trigger" href="#"><span class="icon icon-info"></span></a>
-    </div>
+<?php if ($block->canShow() && $block->showIn('category')) : ?>
+	<div style="display:none;">
+	    <div class="laybuy-installments laybuy-installments-amount"><span class="installments-amount"></span>
+	        <img src="<?php echo $block->getLogo(); ?>"/>
+	        <a class="laybuy-modal-popup-trigger" href="#"><span class="icon icon-info"></span></a>
+	    </div>
+	</div>
     <div id="laybuy-modal-popup">
         <div class="laybuy-content-wrapper">
             <iframe src="<?php echo $block->getPopUpUrl(); ?>"></iframe>
@@ -25,15 +27,14 @@
                 utils,
                 modal
             ) {
-                $(document).on('updatePrice', function(e){
-                    e.target.innerText.match(/[0-9 , \.]+/g).some(function(el) {
-                        let val;
-                        if(val = parseFloat(el.replace(',', ''))) {
-                            $('.laybuy-installments-amount span.installments-amount').html('or 6 interest free payments of <strong>'+ utils.formatPrice(val/6, {}) +'</strong> with');
-                            return;
-                        }
-                    });
-                });
+
+            	var laybuy = $('.laybuy-installments.laybuy-installments-amount').clone();
+            	$('.price-box').append(laybuy);
+
+            	$('.price-box').each(function(){
+            		var price = $('.price-wrapper',this).data('price-amount');
+            		$('.laybuy-installments-amount span.installments-amount',this).html('or 6 interest free payments of <strong>'+ utils.formatPrice(price/6, {decimalSymbol:'.'}) +'</strong> with');
+            	});
 
                 var options = {
                     type: 'popup',
