@@ -59,8 +59,28 @@
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
                 </field>
 
-                <field id="store_token_data" translate="label" type="select" sortOrder="30" showInDefault="1" showInWebsite="1" showInStore="1">
+                <field id="store_token_data" translate="label" type="select" sortOrder="31" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Store token in payment data</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
+
+                <field id="show_in_product_page" translate="label" type="select" sortOrder="32" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Show In Product Page</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
+
+                <field id="show_in_category_page" translate="label" type="select" sortOrder="33" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Show In Category Page</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
+
+                <field id="show_in_cart_page" translate="label" type="select" sortOrder="34" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Show In Cart Page</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
+
+                <field id="show_full_logo" translate="label" type="select" sortOrder="35" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Show Full Logo</label>
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
                 </field>
             </group>

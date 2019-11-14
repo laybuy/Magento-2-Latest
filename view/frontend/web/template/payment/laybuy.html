@@ -19,6 +19,22 @@
         <!--/ko-->
         <img data-bind="attr: {src: getLaybuyLogoSrc(), alt: getTitle(), style: 'max-height: 50px;'}"
              class="payment-icon"/>
+        <div class="laybuy-footer">
+            <div class="laybuy_footer-wrapper">
+                <div class="laybuy-footer__img">
+                    <img data-bind="attr: {src: getLaybuyImagePaySrc()}" alt="Pay" title="Pay" />
+                </div>
+                <div class="laybuy-footer__img">
+                    <img data-bind="attr: {src: getLaybuyImageScheduleSrc()}" alt="Schedule" title="Schedule" />
+                </div>
+                <div class="laybuy-footer__img">
+                    <img data-bind="attr: {src: getLaybuyImageCompleteSrc()}" alt="Complete" title="Complete" />
+                </div>
+                <div class="laybuy-footer__img">
+                    <img data-bind="attr: {src: getLaybuyImageDoneSrc()}" alt="Done" title="Done" />
+                </div>
+            </div>
+        </div>
         <div class="payment-method-billing-address">
             <!-- ko foreach: $parent.getRegion(getBillingAddressFormName()) -->
             <!-- ko template: getTemplate() --><!-- /ko -->

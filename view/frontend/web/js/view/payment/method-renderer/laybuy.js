@@ -47,6 +47,22 @@ define([
             return window.checkoutConfig.payment['laybuy_payment'].logoSrc;
         },
 
+        getLaybuyImagePaySrc: function() {
+            return window.checkoutConfig.payment['laybuy_payment'].checkoutPaySrc;
+        },
+
+        getLaybuyImageScheduleSrc: function() {
+            return window.checkoutConfig.payment['laybuy_payment'].checkoutScheduleSrc;
+        },
+
+        getLaybuyImageCompleteSrc: function() {
+            return window.checkoutConfig.payment['laybuy_payment'].checkoutCompleteSrc;
+        },
+
+        getLaybuyImageDoneSrc: function() {
+            return window.checkoutConfig.payment['laybuy_payment'].checkoutDoneSrc;
+        },
+
         getRedirectUrl: function() {
             var laybuyUrl, redirectUrl, self = this;
 
