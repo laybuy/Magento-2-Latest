@@ -25,15 +25,21 @@
                 utils,
                 modal
             ) {
+                
                 $(document).on('updatePrice', function(e){
-                    e.target.innerText.match(/[0-9 , \.]+/g).some(function(el) {
-                        let val;
-                        if(val = parseFloat(el.replace(',', ''))) {
-                            $('.laybuy-installments-amount span.installments-amount').html('or 6 interest free payments of <strong>'+ utils.formatPrice(val/6, {}) +'</strong> with');
-                            return;
+                    var priceBoxEl = e.target;
+                    $(e.target).parents().each(function(a,b) {
+                        if($(b).hasClass('product-info-main')) {
+                            priceBoxEl.innerText.match(/[0-9 , \.]+/g).some(function(el) {
+                                let val;
+                                if(val = parseFloat(el.replace(',', ''))) {
+                                    $('.laybuy-installments-amount span.installments-amount').html('or 6 interest free payments of <strong>'+ utils.formatPrice(val/6, {}) +'</strong> with')
+                                    return;
+                                }})
                         }
-                    });
+                    })
                 });
+
 
                 var options = {
                     type: 'popup',
