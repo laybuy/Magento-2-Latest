@@ -75,8 +75,6 @@ define([
                 laybuyUrl = window.checkoutConfig.payment['laybuy_payment'].laybuyProcessUrl;
             }
 
-            setBillingAddressAction(globalMessageList);
-
             $.ajax({
                 url: laybuyUrl,
                 method: 'post',
@@ -87,7 +85,9 @@ define([
                     redirectUrl = data.redirect_url;
 
                     if (window.checkoutConfig.payment['laybuy_payment'].paymentAction == 'authorize_capture') {
-                        $.mage.redirect(redirectUrl);
+                        setBillingAddressAction(globalMessageList).success(function() {
+                            $.mage.redirect(redirectUrl);
+                        })
                     } else {
                         self.getPlaceOrderDeferredObject()
                             .fail(

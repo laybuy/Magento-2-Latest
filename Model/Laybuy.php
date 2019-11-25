@@ -97,6 +97,11 @@ class Laybuy extends \Magento\Payment\Model\Method\AbstractMethod
     protected $_canRefund = true;
 
     /**
+     * @var bool
+     */
+    protected $_canOrder = true;
+
+    /**
      * @var \Magento\Framework\View\Asset\Repository
      */
     protected $_assetRepo;
@@ -272,6 +277,10 @@ class Laybuy extends \Magento\Payment\Model\Method\AbstractMethod
 
 
             if ($this->getConfigPaymentAction() == self::ACTION_AUTHORIZE_CAPTURE) {
+                $payment = $quote->getPayment();
+                $payment->setMethod(LaybuyConfig::CODE);
+                $payment->setAdditionalInformation('laybuy_grand_total', $quote->getGrandTotal());
+            } else {
                 $payment = $quote->getPayment();
                 $payment->setMethod(LaybuyConfig::CODE);
                 $payment->setAdditionalInformation('laybuy_grand_total', $quote->getGrandTotal());
@@ -642,6 +651,21 @@ class Laybuy extends \Magento\Payment\Model\Method\AbstractMethod
             $payment->setLastTransId($refundId);
         }
         return $this;
+    }
+
+    public function initialize($paymentAction, $stateObject)
+    {
+        $stateObject->setData('status', \Magento\Sales\Model\Order::STATE_PENDING_PAYMENT);
+        $stateObject->setData('state', \Magento\Sales\Model\Order::STATE_PENDING_PAYMENT);
+        return parent::initialize($paymentAction, $stateObject);
+    }
+
+    /**
+     * @return bool
+     */
+    public function isInitializeNeeded()
+    {
+        return $this->getConfigPaymentAction() !== self::ACTION_AUTHORIZE_CAPTURE;
     }
 }
 

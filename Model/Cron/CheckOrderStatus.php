@@ -75,7 +75,7 @@ class CheckOrderStatus
         $timeToCompare = $date->modify('-30 minutes')->format('Y-m-d h:i:s');
 
 
-        $filter1 = $this->filter->create()->setField('status')->setValue('pending')->setConditionType('eq');
+        $filter1 = $this->filter->create()->setField('status')->setValue('pending_payment')->setConditionType('eq');
         $filter2 = $this->filter->create()->setField('created_at')->setValue($timeToCompare)->setConditionType('lt');
         $filterGroup = $this->filterGroupBuilder->create()->setFilters([$filter1]);
         $filterGroup2 = $this->filterGroupBuilder->create()->setFilters([$filter2]);
