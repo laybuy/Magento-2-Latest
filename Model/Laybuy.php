@@ -97,6 +97,11 @@ class Laybuy extends \Magento\Payment\Model\Method\AbstractMethod
     protected $_canRefund = true;
 
     /**
+     * @var bool
+     */
+    protected $_canOrder = true;
+
+    /**
      * @var \Magento\Framework\View\Asset\Repository
      */
     protected $_assetRepo;
@@ -272,6 +277,10 @@ class Laybuy extends \Magento\Payment\Model\Method\AbstractMethod
 
 
             if ($this->getConfigPaymentAction() == self::ACTION_AUTHORIZE_CAPTURE) {
+                $payment = $quote->getPayment();
+                $payment->setMethod(LaybuyConfig::CODE);
+                $payment->setAdditionalInformation('laybuy_grand_total', $quote->getGrandTotal());
+            } else {
                 $payment = $quote->getPayment();
                 $payment->setMethod(LaybuyConfig::CODE);
                 $payment->setAdditionalInformation('laybuy_grand_total', $quote->getGrandTotal());
