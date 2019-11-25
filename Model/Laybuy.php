@@ -652,6 +652,21 @@ class Laybuy extends \Magento\Payment\Model\Method\AbstractMethod
         }
         return $this;
     }
+
+    public function initialize($paymentAction, $stateObject)
+    {
+        $stateObject->setData('status', \Magento\Sales\Model\Order::STATE_PENDING_PAYMENT);
+        $stateObject->setData('state', \Magento\Sales\Model\Order::STATE_PENDING_PAYMENT);
+        return parent::initialize($paymentAction, $stateObject);
+    }
+
+    /**
+     * @return bool
+     */
+    public function isInitializeNeeded()
+    {
+        return $this->getConfigPaymentAction() !== self::ACTION_AUTHORIZE_CAPTURE;
+    }
 }
 
 
