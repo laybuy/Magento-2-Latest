@@ -4,12 +4,12 @@
  */
 ?>
 <?php if ($block->canShow() && $block->showIn('category')) : ?>
-	<div style="display:none;">
-	    <div class="laybuy-installments laybuy-installments-amount"><span class="installments-amount"></span>
-	        <img src="<?php echo $block->getLogo(); ?>"/>
-	        <a class="laybuy-modal-popup-trigger" href="#"><span class="icon icon-info"></span></a>
-	    </div>
-	</div>
+    <div style="display:none;">
+        <div class="laybuy-installments laybuy-installments-amount"><span class="installments-amount"></span>
+            <img src="<?php echo $block->getLogo(); ?>"/>
+            <a class="laybuy-modal-popup-trigger" href="#"><span class="icon icon-info"></span></a>
+        </div>
+    </div>
     <div id="laybuy-modal-popup">
         <div class="laybuy-content-wrapper">
             <iframe src="<?php echo $block->getPopUpUrl(); ?>"></iframe>
@@ -28,13 +28,23 @@
                 modal
             ) {
 
-            	var laybuy = $('.laybuy-installments.laybuy-installments-amount').clone();
-            	$('.price-box').append(laybuy);
+                var laybuy = $('.laybuy-installments.laybuy-installments-amount').clone();
+                $('.price-box').append(laybuy);
 
-            	$('.price-box').each(function(){
-            		var price = $('.price-wrapper',this).data('price-amount');
-            		$('.laybuy-installments-amount span.installments-amount',this).html('or 6 interest free payments of <strong>'+ utils.formatPrice(price/6, {decimalSymbol:'.'}) +'</strong> with');
-            	});
+                $('.price-box').each(function(){
+                    var price = $('.price-wrapper',this).data('price-amount');
+                    $('.laybuy-installments-amount span.installments-amount',this).html('or 6 interest free payments of <strong>'+ utils.formatPrice(price/6, {decimalSymbol:'.'}) +'</strong> with');
+                });
+
+                $(document).on('updatePrice', function(e){
+                    var product = document.getElementById('product-price-'+$(e.target).data('product-id'));
+                    product.innerText.match(/[0-9 , \.]+/g).some(function(el) {
+                        let val;
+                        if(val = parseFloat(el.replace(',', ''))) {
+                            $('.laybuy-installments-amount span.installments-amount strong',e.target).html(utils.formatPrice(val/6, {}))
+                            return;
+                        }})
+                });
 
                 var options = {
                     type: 'popup',
