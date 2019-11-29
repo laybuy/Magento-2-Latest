@@ -144,7 +144,10 @@ class Installments extends Template
 
         if ($price = $product->getFinalPrice()) {
             return $this->_storeManager->getStore()->getCurrentCurrency()->getCurrencySymbol() . number_format($price / 6, 2);
+        } else {
+            return $this->_storeManager->getStore()->getCurrentCurrency()->getCurrencySymbol() . '0.00';
         }
+
     }
 
     /**
@@ -157,6 +160,52 @@ class Installments extends Template
         if ($grandTotal = $this->cart->getQuote()->getGrandTotal()) {
             return $this->_storeManager->getStore()->getCurrentCurrency()->getCurrencySymbol() . number_format($grandTotal / 6, 2);
         }
+    }
+
+    /**
+     * Returns Laybuy installments currency
+     *
+     * @return string
+     */
+    public function getInstallmentCurrency()
+    {
+        return $this->_storeManager->getStore()->getCurrentCurrency()->getCurrencySymbol();
+    }
+
+    /**
+     * Get Minimum Order Amount
+     *
+     * @return string
+     */
+    public function getMinOrderTotal()
+    {
+        return $this->laybuyConfig->getMinOrderTotal();
+    }
+
+    /**
+     * Get Product Type
+     *
+     * @return string
+     */
+    public function getType()
+    {
+        $productId = $this->registry->registry('product')->getId();
+        $product = $this->product->load($productId);
+
+        return $product->getTypeId();
+    }
+
+    /**
+     * Get Product Price Range for Bundles
+     *
+     * @return array
+     */
+    public function getProductPrice()
+    {
+        $productId = $this->registry->registry('product')->getId();
+        $product = $this->product->load($productId);
+
+        return array($product->getPriceInfo()->getPrice('final_price')->getMinimalPrice()->getValue(),$product->getPriceInfo()->getPrice('final_price')->getMaximalPrice()->getValue());;
     }
 
 }

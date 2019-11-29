@@ -29,22 +29,64 @@
             ) {
 
                 var laybuy = $('.laybuy-installments.laybuy-installments-amount').clone();
-                $('.price-box').append(laybuy);
+                $('.price-box.price-final_price').append(laybuy);
 
-                $('.price-box').each(function(){
-                    var price = $('.price-wrapper',this).data('price-amount');
-                    $('.laybuy-installments-amount span.installments-amount',this).html('or 6 interest free payments of <strong>'+ utils.formatPrice(price/6, {decimalSymbol:'.'}) +'</strong> with');
+                $('.price-box.price-final_price').each(function(){
+                    priceUpdate(this);
                 });
 
                 $(document).on('updatePrice', function(e){
-                    var product = document.getElementById('product-price-'+$(e.target).data('product-id'));
-                    product.innerText.match(/[0-9 , \.]+/g).some(function(el) {
-                        let val;
-                        if(val = parseFloat(el.replace(',', ''))) {
-                            $('.laybuy-installments-amount span.installments-amount strong',e.target).html(utils.formatPrice(val/6, {}))
-                            return;
-                        }})
+                    priceUpdate(e.target);
                 });
+
+                function priceUpdate(element)
+                {   
+                    var min_order = '<?php echo $block->getMinOrderTotal(); ?>';
+                    var product_id = $(element).data('product-id');
+                    var product = document.getElementById('product-price-'+product_id);
+                    var price = 0;
+                    var bundle = false;
+                    var currency = '<?php echo $block->getInstallmentCurrency(); ?>';
+                    if(product == null)
+                    {
+                        if($('.price-container.price-final_price',element).length){
+                            product = $('.price-container.price-final_price',element)[0];
+                        }
+
+                        if($('#from-'+product_id).length && $('#to-'+product_id).length){
+                           price = currency+utils.formatPrice($('#from-'+product_id).data('price-amount')/6, {decimalSymbol:'.'})+' - '+currency+utils.formatPrice($('#to-'+product_id).data('price-amount')/6, {decimalSymbol:'.'});
+                           bundle = true;
+                        }
+
+                        if($('.minimal-price',element).length) {
+                            product = $('.minimal-price',element)[0];
+                        }
+                        
+                    }
+
+                    if(!bundle)
+                    {
+                        product.innerText.match(/[0-9 , \.]+/g).some(function(el) {
+                            let val;
+                            val = parseFloat(el.replace(',', ''));
+                            if(val) {
+                                price = utils.formatPrice(val/6, {decimalSymbol:'.'});
+                            } 
+
+                            if(val == 0) {
+                                $('.laybuy-installments-amount',element).remove();
+                            }
+                        });
+                    }
+
+                    $('.laybuy-installments-amount span.installments-amount',element).html('or 6 interest free payments of <strong>'+price+'</strong> with ');
+
+                    if($('.laybuy-installments-amount span.installments-amount strong',element).text().indexOf(currency) < 0){
+
+                        $('.laybuy-installments-amount span.installments-amount strong',element).prepend(currency);
+                    }
+                    
+                }
 
                 var options = {
                     type: 'popup',
