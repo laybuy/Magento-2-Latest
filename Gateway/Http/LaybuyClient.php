@@ -38,6 +38,11 @@ class LaybuyClient
     protected $logger;
 
     /**
+     * @var Config
+     */
+    protected $config;
+
+    /**
      * LaybuyClient constructor.
      *
      * @param Logger $logger
@@ -48,6 +53,7 @@ class LaybuyClient
         Config $config
     ) {
         $this->logger = $logger;
+        $this->config = $config;
         $this->setupLaybuyClient($config);
     }
 
@@ -152,13 +158,21 @@ class LaybuyClient
      * @return integer
      * @throws LocalizedException
      */
-    public function refundLaybuyOrder($refundDetails)
+    public function refundLaybuyOrder($refundDetails,$storeId)
     {
+        $this->config->setCurrentStore($storeId);
+        $this->setupLaybuyClient($this->config);
+
         $response = $this->restClient->restPost(Config::API_ORDER_REFUND, json_encode($refundDetails));
 
         $body = json_decode($response->getBody());
 
-        if (!$body->result === Config::LAYBUY_SUCCESS) {
+        $this->logger->debug([
+            'Refund Response:' => $body,
+            'Store ID:' => $storeId
+        ]);
+
+        if ($body->result === Config::LAYBUY_FAILURE) {
             $this->logger->debug(['Error while processing refund: ' . $response->getBody()]);
             throw new LocalizedException(__('Unable to process refund.'));
         }
