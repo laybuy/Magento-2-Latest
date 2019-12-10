@@ -638,6 +638,8 @@ class Laybuy extends \Magento\Payment\Model\Method\AbstractMethod
             'amount' => (float)$amount
         ];
 
+        $this->logger->debug([__METHOD__ . 'REFUND DETAILS:' => $refundDetails]);
+
         if ($payment->getCreditmemo() instanceof \Magento\Sales\Api\Data\CreditmemoInterface
             && $payment->getCreditmemo()->getIncrementId()) {
             // Optional, so only add this if a creditmemo has been attached.
@@ -646,7 +648,7 @@ class Laybuy extends \Magento\Payment\Model\Method\AbstractMethod
 
         $this->logger->debug([__METHOD__ . 'LAYBUY ORDER:' => $refundDetails['orderId']]);
 
-        $refundId = $this->httpClient->refundLaybuyOrder($refundDetails);
+        $refundId = $this->httpClient->refundLaybuyOrder($refundDetails,$payment->getOrder()->getStoreId());
         if ($refundId) {
             $payment->setLastTransId($refundId);
         }

@@ -235,6 +235,14 @@ class Config extends ParentConfig
 
     /**
      * @return int
+     */
+    public function setCurrentStore($storeId)
+    {
+        $this->currentStore = $storeId;
+    }
+
+    /**
+     * @return int
      * @throws \Magento\Framework\Exception\NoSuchEntityException
      */
     protected function getCurrentStore()
