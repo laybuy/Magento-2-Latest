@@ -279,7 +279,6 @@ class Laybuy extends \Magento\Payment\Model\Method\AbstractMethod
             if ($this->getConfigPaymentAction() == self::ACTION_AUTHORIZE_CAPTURE) {
                 $payment = $quote->getPayment();
                 $payment->setMethod(LaybuyConfig::CODE);
-                $payment->setAdditionalInformation('laybuy_grand_total', $quote->getGrandTotal());
             } else {
                 $payment = $quote->getPayment();
                 $payment->setMethod(LaybuyConfig::CODE);
@@ -289,9 +288,20 @@ class Laybuy extends \Magento\Payment\Model\Method\AbstractMethod
             $this->quoteValidator->validateBeforeSubmit($quote);
 
             $laybuyOrder = $this->createLaybuyOrder($quote);
-            $redirectUrl = $this->httpClient->getRedirectUrl($laybuyOrder);
+            $data = $this->httpClient->getRedirectUrlAndToken($laybuyOrder);
 
-            return $redirectUrl;
+            if(!$data || !isset($data['redirectUrl']) || !isset($data['token'])) {
+                return false;
+            }
+
+            if ($this->getConfigPaymentAction() == self::ACTION_AUTHORIZE_CAPTURE) {
+                $payment = $quote->getPayment();
+                $payment->setAdditionalInformation('laybuy_grand_total', $quote->getGrandTotal());
+                $payment->setAdditionalInformation('Token', $data['token']);
+                $payment->save();
+            }
+
+            return $data['redirectUrl'];
 
         } catch (\Exception $e) {
             $this->logger->debug([__METHOD__ . ' ERROR LAYBUY REDIRECT ' . $e->getMessage() . " " => $e->getTraceAsString()]);
