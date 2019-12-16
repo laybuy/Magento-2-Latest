@@ -99,6 +99,11 @@ class Laybuy extends \Magento\Payment\Model\Method\AbstractMethod
     /**
      * @var bool
      */
+    protected $_canRefundInvoicePartial = true;
+
+    /**
+     * @var bool
+     */
     protected $_canOrder = true;
 
     /**
