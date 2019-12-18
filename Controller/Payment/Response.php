@@ -84,13 +84,10 @@ class Response extends Action
                         }
 
                         $quote_id = 0;
-                        if(!empty($quote))
+                        if(empty($quote))
                         {
                             $quotePaymentCollection = $this->quotePaymentCollection->create();
                             $quotePaymentCollection->addFieldToFilter('additional_information', array('like' => '%"Token":"'.$token.'"}'));
-
-                            print_r($quotePaymentCollection->getSelect()->__toString());
-                            die();
 
                             if($quotePaymentCollection->count() == 1) {
                                 $quotePayment = $quotePaymentCollection->getData()[0];
