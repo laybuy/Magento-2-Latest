@@ -79,9 +79,13 @@ class Response extends Action
                             ->setLastQuoteId($quote->getId())
                             ->setLastSuccessQuoteId($quote->getId())
                             ->clearHelperData();
-
+                        $this->logger->debug([
+                            'Quote ID:' => $quote->getId()
+                        ]);
                         $quote->collectTotals();
-
+                        $this->logger->debug([
+                            'Quote:' => $quote->getData()
+                        ]);
                         $orderId = $this->cartManagement->placeOrder($quote->getId());
 
                         $order = $this->checkoutSession->getLastRealOrder();
@@ -173,7 +177,7 @@ class Response extends Action
             $this->logger->debug(['process error ' => $e->getTraceAsString()]);
             $this->messageManager->addExceptionMessage($e, $e->getMessage());
 
-            if (isset($order) && !$order->getId()) {
+            if (!isset($orderId) || isset($order) && !$order->getId()) {
                 $this->laybuy->laybuyCancel($token);
             }
 
