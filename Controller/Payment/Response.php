@@ -79,12 +79,11 @@ class Response extends Action
                             ->setLastQuoteId($quote->getId())
                             ->setLastSuccessQuoteId($quote->getId())
                             ->clearHelperData();
-                        $this->logger->debug([
-                            'Quote ID:' => $quote->getId()
-                        ]);
+
+                        
                         $quote->collectTotals();
                         $this->logger->debug([
-                            'Quote:' => $quote->getData()
+                            'Quote ID:' => $quote->getId()
                         ]);
                         $orderId = $this->cartManagement->placeOrder($quote->getId());
 
