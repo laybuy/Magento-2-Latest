@@ -83,7 +83,10 @@ class Response extends Action
                         
                         $quote->collectTotals();
                         $this->logger->debug([
-                            'Quote ID:' => $quote->getId()
+                            'Quote ID:' => $quote->getId(),
+                            'Token:' => $token,
+                            'Laybuy Order ID:' => $laybuyOrderId,
+                            'Payment ID:' => $quote->getPayment()->getId()
                         ]);
                         $orderId = $this->cartManagement->placeOrder($quote->getId());
 
