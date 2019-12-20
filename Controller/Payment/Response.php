@@ -7,7 +7,6 @@ use Magento\Framework\App\Action\Action;
 use Laybuy\Laybuy\Model\Config as LaybuyConfig;
 use Laybuy\Laybuy\Model\Laybuy;
 use Laybuy\Laybuy\Model\LaybuyFactory;
-use Magento\Quote\Model\ResourceModel\Quote\Payment\CollectionFactory as QuotePaymentCollection;
 use Magento\Quote\Api\CartManagementInterface;
 use Magento\Checkout\Model\Session as CheckoutSession;
 use Laybuy\Laybuy\Model\Logger\Logger;
@@ -36,11 +35,6 @@ class Response extends Action
     protected $cartManagement;
 
     /**
-     * @var QuotePaymentCollection
-     */
-    protected $quotePaymentCollection;
-
-    /**
      * Response constructor.
      * @param Logger $logger
      * @param LaybuyFactory $laybuyFactory
@@ -53,14 +47,12 @@ class Response extends Action
         LaybuyFactory $laybuyFactory,
         CheckoutSession $checkoutSession,
         CartManagementInterface $cartManagement,
-        QuotePaymentCollection $quotePaymentCollection,
         Context $context
     ) {
         $this->logger = $logger;
         $this->laybuy = $laybuyFactory->create();
         $this->checkoutSession = $checkoutSession;
         $this->cartManagement = $cartManagement;
-        $this->quotePaymentCollection = $quotePaymentCollection;
         parent::__construct($context);
     }
 
@@ -80,55 +72,17 @@ class Response extends Action
                     if ($quote->getPayment()->getAdditionalInformation('laybuy_grand_total') == $quote->getGrandTotal() && $laybuyOrderId = $this->laybuy->laybuyConfirm($token)) {
                         $quote->getPayment()->setAdditionalInformation(LaybuyConfig::LAYBUY_FIELD_REFERENCE_ORDER_ID, $laybuyOrderId);
                         if($this->laybuy->getConfigData('store_token_data')) {
-                            $quote->getPayment()->setAdditionalInformation('Token', $token)->save();
-                        }
-
-                        $quote_id = 0;
-                        if(!empty($quote))
-                        {
-                            $quotePaymentCollection = $this->quotePaymentCollection->create();
-                            $quotePaymentCollection->addFieldToFilter('additional_information', array('like' => '%"Token":"'.$token.'"}'));
-
-                            print_r($quotePaymentCollection->getSelect()->__toString());
-                            die();
-
-                            if($quotePaymentCollection->count() == 1) {
-                                $quotePayment = $quotePaymentCollection->getData()[0];
-
-                            } else if($quotePaymentCollection->count() > 1) {
-
-                                foreach ($quotePaymentCollection as $item) {
-                                    $data = json_decode($item->getData('additional_information'));
-                                    if($data->Token == $token)
-                                    {
-                                        $quotePayment = $item;
-                                    }
-                                } 
-
-                            } else {
-                                $this->messageManager->addErrorMessage('Laybuy: There was an error with your order');
-                                throw new \Exception();
-                            }
-
-                            $quote_id = $quotePayment['quote_id'];
-                        } else {
-                            $quote_id = $quote->getId();
-                        }
-
-                        if(!$quote_id)
-                        {
-                            $this->messageManager->addErrorMessage('Laybuy: There was an error with your order');
-                            throw new \Exception();
+                            $quote->getPayment()->setAdditionalInformation('Token', $token);
                         }
 
                         $this->checkoutSession
-                            ->setLastQuoteId($quote_id)
-                            ->setLastSuccessQuoteId($quote_id)
+                            ->setLastQuoteId($quote->getId())
+                            ->setLastSuccessQuoteId($quote->getId())
                             ->clearHelperData();
 
                         $quote->collectTotals();
 
-                        $orderId = $this->cartManagement->placeOrder($quote_id);
+                        $orderId = $this->cartManagement->placeOrder($quote->getId());
 
                         $order = $this->checkoutSession->getLastRealOrder();
 
