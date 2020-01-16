@@ -64,22 +64,16 @@ define([
         },
 
         getRedirectUrl: function() {
-            var laybuyUrl, redirectUrl, self = this;
-
-            /**
-             * Checkout for guest and registered customer.
-             */
-            if (!customer.isLoggedIn()) {
-                laybuyUrl = window.checkoutConfig.payment['laybuy_payment'].laybuyProcessUrl + 'guest-email/' + quote.guestEmail;
-            } else {
-                laybuyUrl = window.checkoutConfig.payment['laybuy_payment'].laybuyProcessUrl;
-            }
+            var redirectUrl, self = this;
 
             $.ajax({
-                url: laybuyUrl,
+                url: window.checkoutConfig.payment['laybuy_payment'].laybuyProcessUrl,
                 method: 'post',
                 cache: false,
-                async: false
+                async: false,
+                data: {
+                    "guest-email": quote.guestEmail
+                }
             }).success(function(data) {
                 if (data.success) {
                     redirectUrl = data.redirect_url;
