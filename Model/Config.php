@@ -56,6 +56,8 @@ class Config extends ParentConfig
 
     const API_ORDER_REFUND = '/order/refund';
 
+    const API_ORDER_CHECK = '/order/merchant';
+
     const LAYBUY_SUCCESS = 'SUCCESS';
 
     const LAYBUY_FAILURE = 'ERROR';

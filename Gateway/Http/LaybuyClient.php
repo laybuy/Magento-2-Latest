@@ -179,4 +179,26 @@ class LaybuyClient
 
         return $body->refundId;
     }
+
+     /**
+     * @param $token
+     * @return array
+     */
+    public function checkMerchantOrder($merchantReference)
+    {
+        if (!$this->restClient) {
+            return false;
+        }
+
+        $response = $this->restClient->restGet(Config::API_ORDER_CHECK . '/' . $merchantReference);
+        $body = json_decode($response->getBody());
+
+        $this->logger->debug(['method' => __METHOD__, 'Response' => $body]);
+
+        if ($body->result == Config::LAYBUY_SUCCESS) {
+            return $body;
+        }
+
+        return false;
+    }
 }

@@ -660,6 +660,21 @@ class Laybuy extends \Magento\Payment\Model\Method\AbstractMethod
         return $this;
     }
 
+    public function refundLaybuy($laybuyOrderId,$amount,$storeId)
+    {
+        // Mandatory fields
+        $refundDetails = [
+            'orderId' => $laybuyOrderId,
+            'amount' => (float)$amount
+        ];
+
+        $this->logger->debug([__METHOD__ . 'REFUND DETAILS:' => $refundDetails]);
+
+        $response = $this->httpClient->refundLaybuyOrder($refundDetails,$storeId);
+
+        return $response->result;
+    }
+
     public function initialize($paymentAction, $stateObject)
     {
         $stateObject->setData('status', \Magento\Sales\Model\Order::STATE_PENDING_PAYMENT);
@@ -673,6 +688,19 @@ class Laybuy extends \Magento\Payment\Model\Method\AbstractMethod
     public function isInitializeNeeded()
     {
         return $this->getConfigPaymentAction() !== self::ACTION_AUTHORIZE_CAPTURE;
+    }
+
+    /**
+     * Confirms Laybuy Order Status
+     * @param $merchantReference
+     * @return array
+     */
+    public function laybuyCheckOrder($merchantReference)
+    {
+        $laybuyCheckResult = $this->httpClient->checkMerchantOrder($merchantReference);
+        $this->logger->debug([__METHOD__ . 'LAYBUY ORDER STATUS:' => $laybuyCheckResult, 'MERCHANT REFERENCE' => $merchantReference]);
+
+        return $laybuyCheckResult;
     }
 }
 

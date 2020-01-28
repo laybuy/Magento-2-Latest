@@ -65,10 +65,12 @@ class Response extends Action
 
         $token = $this->getRequest()->getParam('token');
         $laybuyStatus = $this->getRequest()->getParam('status');
+        $quote = $this->checkoutSession->getQuote();
+        $merchantReference = $quote->getReservedOrderId();
 
         try {
             if ($this->laybuy->getConfigPaymentAction() == Laybuy::ACTION_AUTHORIZE_CAPTURE) {
-                if ($laybuyStatus == LaybuyConfig::LAYBUY_SUCCESS && $quote = $this->checkoutSession->getQuote()) {
+                if ($laybuyStatus == LaybuyConfig::LAYBUY_SUCCESS && $quote) {
                     if ($quote->getPayment()->getAdditionalInformation('laybuy_grand_total') == $quote->getGrandTotal() && $laybuyOrderId = $this->laybuy->laybuyConfirm($token)) {
                         $quote->getPayment()->setAdditionalInformation(LaybuyConfig::LAYBUY_FIELD_REFERENCE_ORDER_ID, $laybuyOrderId);
                         if($this->laybuy->getConfigData('store_token_data')) {
@@ -181,6 +183,11 @@ class Response extends Action
 
             if (!isset($orderId) || isset($order) && !$order->getId()) {
                 $this->laybuy->laybuyCancel($token);
+            }
+
+            if($laybuyOrder = $this->laybuy->laybuyCheckOrder($merchantReference))
+            {
+                $this->laybuy->refundLaybuy($laybuyOrder->orderId,$laybuyOrder->amount,$quote->getStoreId());
             }
 
             return $this->_redirect('checkout/cart', ['_secure' => true]);
