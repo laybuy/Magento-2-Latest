@@ -158,7 +158,7 @@ class LaybuyClient
      * @return integer
      * @throws LocalizedException
      */
-    public function refundLaybuyOrder($refundDetails,$storeId)
+    public function refundLaybuyOrder($refundDetails, $storeId)
     {
         $this->config->setCurrentStore($storeId);
         $this->setupLaybuyClient($this->config);

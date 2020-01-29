@@ -185,9 +185,8 @@ class Response extends Action
                 $this->laybuy->laybuyCancel($token);
             }
 
-            if($laybuyOrder = $this->laybuy->laybuyCheckOrder($merchantReference))
-            {
-                $this->laybuy->refundLaybuy($laybuyOrder->orderId,$laybuyOrder->amount,$quote->getStoreId());
+            if($laybuyOrder = $this->laybuy->laybuyCheckOrder($merchantReference)) {
+                $this->laybuy->refundLaybuy($laybuyOrder->orderId, $laybuyOrder->amount, $quote->getStoreId());
             }
 
             return $this->_redirect('checkout/cart', ['_secure' => true]);

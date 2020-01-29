@@ -660,8 +660,26 @@ class Laybuy extends \Magento\Payment\Model\Method\AbstractMethod
         return $this;
     }
 
-    public function refundLaybuy($laybuyOrderId,$amount,$storeId)
+    /**
+     * Confirms Laybuy Order Status
+     * @param $laybuyOrderId
+     * @param $amount
+     * @param $storeId
+     * @return boolean
+     */
+    public function refundLaybuy($laybuyOrderId, $amount, $storeId)
     {
+
+        if (!$laybuyOrderId || !$amount) {
+            $this->logger->debug(['Unable to process refund, laybuy order details are missing.']);
+            return false;
+        }
+
+        if(!$storeId)
+        {
+            $storeId = $this->_storeManager->getStore()->getId();
+        }
+
         // Mandatory fields
         $refundDetails = [
             'orderId' => $laybuyOrderId,
@@ -670,9 +688,11 @@ class Laybuy extends \Magento\Payment\Model\Method\AbstractMethod
 
         $this->logger->debug([__METHOD__ . 'REFUND DETAILS:' => $refundDetails]);
 
-        $response = $this->httpClient->refundLaybuyOrder($refundDetails,$storeId);
+        $laybuyResponse = $this->httpClient->refundLaybuyOrder($refundDetails, $storeId);
 
-        return $response->result;
+        $this->logger->debug([__METHOD__ . 'LAYBUY REFUND RESPONSE:' => $laybuyResponse, 'STORE ID' => $storeId]);
+
+        return $laybuyResponse;
     }
 
     public function initialize($paymentAction, $stateObject)
