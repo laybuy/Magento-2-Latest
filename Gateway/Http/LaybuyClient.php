@@ -62,7 +62,7 @@ class LaybuyClient
      * @param $laybuyOrder
      * @return bool
      */
-    public function getRedirectUrl($laybuyOrder)
+    public function getRedirectUrlAndToken($laybuyOrder)
     {
         if (!$this->restClient) {
             return false;
@@ -70,14 +70,17 @@ class LaybuyClient
 
         $response = $this->restClient->restPost(Config::API_ORDER_CREATE, json_encode($laybuyOrder));
         $body = json_decode($response->getBody());
+        $returnData = [];
         $this->logger->debug([__METHOD__ => $body]);
 
         if ($body->result == Config::LAYBUY_SUCCESS) {
-            if (!$body->paymentUrl) {
+            if (!$body->paymentUrl || !$body->token) {
                 return false;
             }
+            $returnData['redirectUrl'] = $body->paymentUrl;
+            $returnData['token'] = $body->token;
 
-            return $body->paymentUrl;
+            return $returnData;
         }
 
         return false;
