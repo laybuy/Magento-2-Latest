@@ -166,10 +166,6 @@ class Response extends Action
                     }
                     $this->laybuy->cancelMagentoOrder($order, $token, $message);
 
-                    if ($order->canCancel()) {
-                        $order->cancel();
-                    }
-
                     return $this->_redirect('checkout/cart', ['_secure' => true]);
 
                 }
@@ -184,10 +180,10 @@ class Response extends Action
 
             if (!isset($orderId) || isset($order) && !$order->getId()) {
                 $this->laybuy->laybuyCancel($token);
-            }
 
-            if($laybuyOrder = $this->laybuy->laybuyCheckOrder($merchantReference)) {
-                $this->laybuy->refundLaybuy($laybuyOrder->orderId, $laybuyOrder->amount, $quote->getStoreId());
+                if($laybuyOrder = $this->laybuy->laybuyCheckOrder($merchantReference)) {
+                    $this->laybuy->refundLaybuy($laybuyOrder->orderId, $laybuyOrder->amount, $quote->getStoreId());
+                }
             }
 
             return $this->_redirect('checkout/cart', ['_secure' => true]);
