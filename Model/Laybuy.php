@@ -89,7 +89,7 @@ class Laybuy extends \Magento\Payment\Model\Method\AbstractMethod
     /**
      * @var array
      */
-    protected $_supportedCurrencyCodes = ['NZD', 'AUD', 'GBP'];
+    protected $_supportedCurrencyCodes = ['NZD', 'AUD', 'GBP', 'USD'];
 
     /**
      * @var bool

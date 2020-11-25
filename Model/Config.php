@@ -66,7 +66,7 @@ class Config extends ParentConfig
 
     const LAYBUY_FIELD_REFERENCE_ORDER_ID = 'Reference Order Id';
 
-    const SUPPORTED_CURRENCY_CODES = ['NZD', 'AUD', 'GBP'];
+    const SUPPORTED_CURRENCY_CODES = ['NZD', 'AUD', 'GBP', 'USD'];
 
     const FULL_LOGO = 'logo/full.svg';
 
