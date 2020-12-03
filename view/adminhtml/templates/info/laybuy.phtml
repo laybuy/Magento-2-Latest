@@ -17,14 +17,14 @@
                     <tr>
                         <td></td>
                         <td><?php echo $block->escapeHtml($_subKey)?>:</td>
-                        <td><?php echo nl2br(implode($block->getValueAsArray($_subValue, true), "\n"))?></td>
+                        <td><?php echo nl2br(implode("\n", $block->getValueAsArray($_subValue, true)))?></td>
                     </tr>
                 <?php endforeach; ?>
 
             <?php else: ?>
                 <tr>
                     <td><?php echo $block->escapeHtml($_label)?>:</td>
-                    <td colspan="2"><?php echo nl2br(implode($block->getValueAsArray($_value, true), "\n"))?></td>
+                    <td colspan="2"><?php echo nl2br(implode("\n", $block->getValueAsArray($_value, true)))?></td>
                 </tr>
             <?php endif;?>
         <?php endforeach; ?>
