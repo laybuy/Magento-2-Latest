@@ -83,7 +83,7 @@ class Response extends Action
                             ->setLastSuccessQuoteId($quote->getId())
                             ->clearHelperData();
 
-                        
+
                         $quote->collectTotals();
                         $this->logger->debug([
                             'Quote ID:' => $quote->getId(),
@@ -184,10 +184,6 @@ class Response extends Action
 
             if (!isset($orderId) || isset($order) && !$order->getId()) {
                 $this->laybuy->laybuyCancel($token);
-            }
-
-            if($laybuyOrder = $this->laybuy->laybuyCheckOrder($merchantReference)) {
-                $this->laybuy->refundLaybuy($laybuyOrder->orderId, $laybuyOrder->amount, $quote->getStoreId());
             }
 
             return $this->_redirect('checkout/cart', ['_secure' => true]);

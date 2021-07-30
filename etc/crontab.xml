@@ -6,8 +6,11 @@
 -->
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Cron:etc/crontab.xsd">
     <group id="default">
-        <job name="laybuy_check_order_status" instance="Laybuy\Laybuy\Model\Cron\CheckOrderStatus" method="execute">
-            <schedule>*/30 * * * *</schedule>
+        <job name="laybuy_update_order_capture" instance="Laybuy\Laybuy\Cron\Order\Type\Capture" method="execute">
+            <schedule>0 * * * *</schedule>
+        </job>
+        <job name="laybuy_update_order_invoice" instance="Laybuy\Laybuy\Cron\Order\Type\Order" method="execute">
+            <schedule>0 */2 * * *</schedule>
         </job>
     </group>
 </config>

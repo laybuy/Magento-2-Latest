@@ -58,6 +58,8 @@ class Config extends ParentConfig
 
     const API_ORDER_CHECK = '/order/merchant';
 
+    const API_ORDER_CHECK_BY_ID = '/order';
+
     const LAYBUY_SUCCESS = 'SUCCESS';
 
     const LAYBUY_FAILURE = 'ERROR';

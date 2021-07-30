@@ -299,12 +299,10 @@ class Laybuy extends \Magento\Payment\Model\Method\AbstractMethod
                 return false;
             }
 
-            if ($this->getConfigPaymentAction() == self::ACTION_AUTHORIZE_CAPTURE) {
-                $payment = $quote->getPayment();
-                $payment->setAdditionalInformation('laybuy_grand_total', $quote->getGrandTotal());
-                $payment->setAdditionalInformation('Token', $data['token']);
-                $payment->save();
-            }
+            $payment = $quote->getPayment();
+            $payment->setAdditionalInformation('laybuy_grand_total', $quote->getGrandTotal());
+            $payment->setAdditionalInformation('Token', $data['token']);
+            $payment->save();
 
             return $data['redirectUrl'];
 
@@ -731,6 +729,18 @@ class Laybuy extends \Magento\Payment\Model\Method\AbstractMethod
         $this->logger->debug([__METHOD__ . 'LAYBUY ORDER STATUS:' => $laybuyCheckResult, 'MERCHANT REFERENCE' => $merchantReference]);
 
         return $laybuyCheckResult;
+    }
+
+    /**
+     * @param $laybuyOrderId
+     * @return false|mixed
+     */
+    public function laybuyGetOrderById($laybuyOrderId)
+    {
+        $laybuyOrderResult = $this->httpClient->laybuyGetOrderById($laybuyOrderId);
+        $this->logger->debug([__METHOD__ . 'LAYBUY ORDER RESULT:' => $laybuyOrderResult, 'LAYBUY ORDER ID' => $laybuyOrderId]);
+
+        return $laybuyOrderResult;
     }
 }
 

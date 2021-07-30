@@ -204,4 +204,26 @@ class LaybuyClient
 
         return false;
     }
+
+    /**
+     * @param $laybuyOrderId
+     * @return false|mixed
+     */
+    public function laybuyGetOrderById($laybuyOrderId)
+    {
+        if (!$this->restClient) {
+            return false;
+        }
+
+        $response = $this->restClient->restGet(Config::API_ORDER_CHECK_BY_ID . '/' . $laybuyOrderId);
+        $body = json_decode($response->getBody());
+
+        $this->logger->debug(['method' => __METHOD__, 'Response' => $body]);
+
+        if ($body->result == Config::LAYBUY_SUCCESS) {
+            return $body;
+        }
+
+        return false;
+    }
 }

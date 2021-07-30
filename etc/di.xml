@@ -32,4 +32,13 @@
             </argument>
         </arguments>
     </virtualType>
+    <type name="Laybuy\Laybuy\Model\Logger\ConvertQuoteLogger">
+        <arguments>
+            <argument name="filesystem" xsi:type="object">Magento\Framework\Filesystem\Driver\File</argument>
+            <argument name="name" xsi:type="string">LaybuyConvertQuote</argument>
+            <argument name="handlers" xsi:type="array">
+                <item name="system" xsi:type="object">Laybuy\Laybuy\Model\Logger\ConvertQuoteHandler</item>
+            </argument>
+        </arguments>
+    </type>
 </config>
