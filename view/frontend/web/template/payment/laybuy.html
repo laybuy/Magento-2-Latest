@@ -11,6 +11,8 @@
                class="radio"
                data-bind="attr: {'id': getCode()}, value: getCode(), checked: isChecked, click: selectPaymentMethod, visible: isRadioButtonVisible()" />
         <label data-bind="attr: {'for': getCode()}" class="label"><span data-bind="text: getTitle()"></span></label>
+        <img data-bind="attr: {src: getLaybuyLogoSrc(), alt: getTitle()}"
+             class="payment-icon laybuy-payment-icon"/>
     </div>
 
     <div class="payment-method-content">
