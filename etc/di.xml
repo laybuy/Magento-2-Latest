@@ -41,4 +41,11 @@
             </argument>
         </arguments>
     </type>
+    <type name="Magento\Framework\Console\CommandList">
+        <arguments>
+            <argument name="commands" xsi:type="array">
+                <item name="laybuy_labuy_convert_order" xsi:type="object">Laybuy\Laybuy\Console\Command\ConvertOrder</item>
+            </argument>
+        </arguments>
+    </type>
 </config>

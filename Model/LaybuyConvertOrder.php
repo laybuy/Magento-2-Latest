@@ -246,7 +246,7 @@ class LaybuyConvertOrder
      * @param $orderId
      * @param $orderIncrementId
      * @param $token
-     * @return false
+     * @return bool
      */
     public function validateAndCreateInvoiceOrder($orderId, $orderIncrementId, $token)
     {
@@ -279,6 +279,7 @@ class LaybuyConvertOrder
                         if ($this->laybuy->getConfigData('send_invoice_to_customer')) {
                             $this->invoiceSender->send($invoice);
                         }
+                        return true;
                     }
                 }
             }
