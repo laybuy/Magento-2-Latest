@@ -107,6 +107,9 @@ class Response extends Action
                             ]);
 
                             return $this->_redirect('checkout/onepage/success', ['_secure' => true]);
+                        } else {
+                            $this->messageManager->addErrorMessage('Order not exist on Magento');
+                            $this->logger->debug(['Order can not create from quote' => $quote->getId()]);
                         }
                     } else {
                         $message = 'Laybuy: There was an error, payment failed.';
@@ -154,6 +157,14 @@ class Response extends Action
                             $this->messageManager->addErrorMessage('Laybuy order confirmation error.');
                             throw new \Exception();
                         }
+                    } else {
+                        $message = 'Laybuy order ID did not exist.';
+                        $this->messageManager->addErrorMessage($message);
+                        $this->logger->debug([
+                            $message,
+                            'Laybuy status' => $laybuyStatus,
+                            'order_id' => $order->getId()
+                        ]);
                     }
 
                 } else {

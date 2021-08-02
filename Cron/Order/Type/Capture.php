@@ -74,7 +74,7 @@ class Capture
                     $quoteInformation = $quoteData['additional_information'];
                     $this->laybuyConvertOrder->processValidateAndCreateOrder($quoteId, $quoteInformation);
                 } catch (\Exception $e) {
-                    $this->logger->error('Convert quote error',
+                    $this->logger->error('Convert quote to order error',
                         ['quote_id' => $quoteId, 'message' => $e->getMessage(), 'trace' => $e->getTraceAsString()]
                     );
                 }

@@ -130,7 +130,17 @@ class LaybuyConvertOrder
                 $laybuyOrderDetail = $this->laybuy->laybuyGetOrderById($orderId);
                 if ($laybuyOrderDetail && $quote = $this->validateOrderLaybuy($laybuyOrderDetail, $quoteId)) {
                     $this->createOrder($quote, $orderId, $token);
+                } else {
+                    $this->logger->error('Can not get order ID from laybuy', [
+                        'quote_id' => $quoteId,
+                        'token' => $token
+                    ]);
                 }
+            } else {
+                $this->logger->error('Can not get order ID from laybuy', [
+                    'quote_id' => $quoteId,
+                    'token' => $token
+                ]);
             }
         }
     }
@@ -280,8 +290,23 @@ class LaybuyConvertOrder
                             $this->invoiceSender->send($invoice);
                         }
                         return true;
+                    } else {
+                        $this->logger->error('Magento does not allow order create invoice', [
+                            'order_id' => $orderId,
+                            'order_can_invoice' => $order->canInvoice(),
+                            'payment_method' => $order->getPayment()->getMethod()
+                        ]);
                     }
+                } else {
+                    $this->logger->error('Order Laybuy Data not validate for create an invoice', [
+                        'order_id' => $orderId,
+                        'order_laybuy_data' => $orderLaybuyData
+                    ]);
                 }
+            } else {
+                $this->logger->error('Order Laybuy Data empty, can not create order invoice', [
+                    'order_id' => $orderId,
+                ]);
             }
         } catch (\Exception $e) {
             $this->logger->error('Can\'t create order invoice', [

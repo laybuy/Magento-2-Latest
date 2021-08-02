@@ -66,10 +66,12 @@ class Order
                 ->where('sales_order.state = (?)', \Magento\Sales\Model\Order::STATE_PENDING_PAYMENT);
             $orderList = $connection->fetchAll($select);
             foreach ($orderList as $order) {
-                $laybuyData = json_decode($order['additional_information'], true);
                 $token = '';
-                if (isset($laybuyData['Token'])) {
-                    $token= $laybuyData['Token'];
+                if ($order['additional_information']) {
+                    $laybuyData = json_decode($order['additional_information'], true);
+                    if (isset($laybuyData['Token'])) {
+                        $token= $laybuyData['Token'];
+                    }
                 }
                 $this->laybuyConvertOrder->validateAndCreateInvoiceOrder($order['entity_id'], $order['increment_id'], $token);
             }
