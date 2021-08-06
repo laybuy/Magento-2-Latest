@@ -19,12 +19,13 @@
                 <min_order_total>10</min_order_total>
                 <max_order_total>5000</max_order_total>
                 <model>Laybuy\Laybuy\Model\Laybuy</model>
-                <title>LayBuy Payment</title>
+                <title>Laybuy Payment</title>
                 <debug>1</debug>
                 <show_in_product_page>1</show_in_product_page>
                 <show_in_category_page>1</show_in_category_page>
                 <show_in_cart_page>1</show_in_cart_page>
                 <show_full_logo>0</show_full_logo>
+                <show_logo_position>right</show_logo_position>
             </laybuy_payment>
         </payment>
     </default>
