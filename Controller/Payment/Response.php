@@ -148,6 +148,7 @@ class Response extends Action
                                 'Order Successfully Updated' => $order->getId(),
                                 'Laybuy order' => $laybuyOrderId
                             ]);
+                            $this->laybuy->sendOrderEmail($order);
                             return $this->_redirect('checkout/onepage/success', ['_secure' => true]);
                         } else {
                             $this->logger->debug([
