@@ -80,9 +80,9 @@ class ConvertOrder extends Command
         } catch (\Exception $e) {
         }
         if ($this->laybuyConvertOrder->getConfigPaymentAction() === Laybuy::ACTION_AUTHORIZE_CAPTURE) {
-            $this->orderTypeCapture->execute();
+            $this->orderTypeCapture->executeCommand();
         } elseif ($this->laybuyConvertOrder->getConfigPaymentAction() === Laybuy::ACTION_ORDER) {
-            $this->orderTypeOrder->execute();
+            $this->orderTypeOrder->executeCommand();
         }
         $output->writeln('--- End Process ---');
 
