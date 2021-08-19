@@ -69,8 +69,12 @@ class Invoice extends Action
                         $token = $laybuyInformation['Token'];
                     }
                 }
-                $this->laybuyConvertOrder->validateAndCreateInvoiceOrder($order->getEntityId(), $order->getIncrementId(), $token);
-                $this->messageManager->addSuccessMessage(__('Create Laybuy invoice successfully.'));
+                $status = $this->laybuyConvertOrder->validateAndCreateInvoiceOrder($order->getEntityId(), $order->getIncrementId(), $token);
+                if ($status) {
+                    $this->messageManager->addSuccessMessage(__('Create Laybuy invoice successfully.'));
+                } else {
+                    $this->messageManager->addErrorMessage(__('Can not create Laybuy invoice.'));
+                }
             } catch (\Exception $e) {
                 $this->logger->error('Can not create Laybuy invoice', [
                     'order_id' => $orderId,
