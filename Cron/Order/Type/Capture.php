@@ -37,8 +37,7 @@ class Capture
         ResourceConnection $resource,
         ConvertQuoteLogger $logger,
         LaybuyConvertOrder $laybuyConvertOrder
-    )
-    {
+    ) {
         $this->resource = $resource;
         $this->logger = $logger;
         $this->laybuyConvertOrder = $laybuyConvertOrder;
