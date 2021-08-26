@@ -315,13 +315,14 @@ class Laybuy extends \Magento\Payment\Model\Method\AbstractMethod
      * Confirms laybuy order
      *
      * @param $token
-     * @return bool|int
+     * @param null $storeId
+     * @return bool
      */
-    public function laybuyConfirm($token)
+    public function laybuyConfirm($token, $storeId=null)
     {
-        $laybuyOrderId = $this->httpClient->getLaybuyConfirmationOrderId($token);
+        $laybuyOrderId = $this->httpClient->getLaybuyConfirmationOrderId($token, $storeId);
 
-        $this->logger->debug([__METHOD__ . 'LAYBUY ORDER:' => $laybuyOrderId, 'TOKEN' => $token]);
+        $this->logger->debug([__METHOD__ . 'LAYBUY ORDER:' => $laybuyOrderId, 'TOKEN' => $token, 'STORE ID' => $storeId]);
 
         return $laybuyOrderId;
     }
@@ -719,26 +720,27 @@ class Laybuy extends \Magento\Payment\Model\Method\AbstractMethod
     }
 
     /**
-     * Confirms Laybuy Order Status
      * @param $merchantReference
-     * @return array
+     * @param $storeId
+     * @return false|mixed
      */
-    public function laybuyCheckOrder($merchantReference)
+    public function laybuyCheckOrder($merchantReference, $storeId)
     {
-        $laybuyCheckResult = $this->httpClient->checkMerchantOrder($merchantReference);
-        $this->logger->debug([__METHOD__ . 'LAYBUY ORDER STATUS:' => $laybuyCheckResult, 'MERCHANT REFERENCE' => $merchantReference]);
+        $laybuyCheckResult = $this->httpClient->checkMerchantOrder($merchantReference, $storeId);
+        $this->logger->debug([__METHOD__ . 'LAYBUY ORDER STATUS:' => $laybuyCheckResult, 'MERCHANT REFERENCE' => $merchantReference, 'STORE ID' => $storeId]);
 
         return $laybuyCheckResult;
     }
 
     /**
      * @param $laybuyOrderId
+     * @param $storeId
      * @return false|mixed
      */
-    public function laybuyGetOrderById($laybuyOrderId)
+    public function laybuyGetOrderById($laybuyOrderId, $storeId)
     {
-        $laybuyOrderResult = $this->httpClient->laybuyGetOrderById($laybuyOrderId);
-        $this->logger->debug([__METHOD__ . 'LAYBUY ORDER RESULT:' => $laybuyOrderResult, 'LAYBUY ORDER ID' => $laybuyOrderId]);
+        $laybuyOrderResult = $this->httpClient->laybuyGetOrderById($laybuyOrderId, $storeId);
+        $this->logger->debug([__METHOD__ . 'LAYBUY ORDER RESULT:' => $laybuyOrderResult, 'LAYBUY ORDER ID' => $laybuyOrderId, 'STORE ID' => $storeId]);
 
         return $laybuyOrderResult;
     }

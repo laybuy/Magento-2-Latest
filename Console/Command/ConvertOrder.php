@@ -79,11 +79,8 @@ class ConvertOrder extends Command
             $this->state->setAreaCode(\Magento\Framework\App\Area::AREA_ADMINHTML);
         } catch (\Exception $e) {
         }
-        if ($this->laybuyConvertOrder->getConfigPaymentAction() === Laybuy::ACTION_AUTHORIZE_CAPTURE) {
-            $this->orderTypeCapture->executeCommand();
-        } elseif ($this->laybuyConvertOrder->getConfigPaymentAction() === Laybuy::ACTION_ORDER) {
-            $this->orderTypeOrder->executeCommand();
-        }
+        $this->orderTypeCapture->executeCommand();
+        $this->orderTypeOrder->executeCommand();
         $output->writeln('--- End Process ---');
 
     }

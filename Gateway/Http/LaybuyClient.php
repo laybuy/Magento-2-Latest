@@ -88,12 +88,18 @@ class LaybuyClient
 
     /**
      * @param $token
-     * @return bool
+     * @param null $storeId
+     * @return false
      */
-    public function getLaybuyConfirmationOrderId($token)
+    public function getLaybuyConfirmationOrderId($token, $storeId = null)
     {
         if (!$this->restClient) {
             return false;
+        }
+
+        if($storeId) {
+            $this->config->setCurrentStore($storeId);
+            $this->setupLaybuyClient($this->config);
         }
 
         $response = $this->restClient->restPost(Config::API_ORDER_CONFIRM, json_encode(['token' => $token]));
@@ -183,15 +189,15 @@ class LaybuyClient
         return $body->refundId;
     }
 
-     /**
-     * @param $token
-     * @return array
+    /**
+     * @param $merchantReference
+     * @param $storeId
+     * @return false|mixed
      */
-    public function checkMerchantOrder($merchantReference)
+    public function checkMerchantOrder($merchantReference, $storeId)
     {
-        if (!$this->restClient) {
-            return false;
-        }
+        $this->config->setCurrentStore($storeId);
+        $this->setupLaybuyClient($this->config);
 
         $response = $this->restClient->restGet(Config::API_ORDER_CHECK . '/' . $merchantReference);
         $body = json_decode($response->getBody());
@@ -207,13 +213,13 @@ class LaybuyClient
 
     /**
      * @param $laybuyOrderId
+     * @param $storeId
      * @return false|mixed
      */
-    public function laybuyGetOrderById($laybuyOrderId)
+    public function laybuyGetOrderById($laybuyOrderId, $storeId)
     {
-        if (!$this->restClient) {
-            return false;
-        }
+        $this->config->setCurrentStore($storeId);
+        $this->setupLaybuyClient($this->config);
 
         $response = $this->restClient->restGet(Config::API_ORDER_CHECK_BY_ID . '/' . $laybuyOrderId);
         $body = json_decode($response->getBody());

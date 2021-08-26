@@ -120,18 +120,19 @@ class LaybuyConvertOrder
     /**
      * @param $quoteId
      * @param $quoteInformation
+     * @param $storeId
      */
-    public function processValidateAndCreateOrder($quoteId, $quoteInformation)
+    public function processValidateAndCreateOrder($quoteId, $quoteInformation, $storeId)
     {
         if ($quoteInformation) {
             $token = json_decode($quoteInformation, true)['Token'];
-            $orderId = $this->getOrderIdByToken($this->laybuy, $token);
+            $orderId = $this->getOrderIdByToken($this->laybuy, $token, $storeId);
             if ($orderId) {
-                $laybuyOrderDetail = $this->laybuy->laybuyGetOrderById($orderId);
+                $laybuyOrderDetail = $this->laybuy->laybuyGetOrderById($orderId, $storeId);
                 if ($laybuyOrderDetail && $quote = $this->validateOrderLaybuy($laybuyOrderDetail, $quoteId)) {
                     $this->createOrder($quote, $orderId, $token);
                 } else {
-                    $this->logger->error('Can not get order ID from laybuy', [
+                    $this->logger->error('Can not create an order', [
                         'quote_id' => $quoteId,
                         'token' => $token
                     ]);
@@ -193,6 +194,8 @@ class LaybuyConvertOrder
                 && (float)$quote->getGrandTotal() === (float)$laybuyOrderDetailArray['amount']) {
                 return $quote;
             }
+            $this->logger->error('Quote not validate',
+                ['quote_id' => $quoteId, 'laybuyOrderDetail' => $laybuyOrderDetail, 'quote_grand_total' => $quote->getGrandTotal(), 'laybuy_total' => $laybuyOrderDetailArray['amount']]);
         } catch (\Exception $e) {
             $this->logger->error('Quote not validate',
                 [
@@ -203,8 +206,6 @@ class LaybuyConvertOrder
                 ]);
             return false;
         }
-        $this->logger->error('Quote not validate',
-            ['quote_id' => $quoteId, 'laybuyOrderDetail' => $laybuyOrderDetail]);
         return false;
     }
 
@@ -234,13 +235,14 @@ class LaybuyConvertOrder
     /**
      * @param $laybuy
      * @param $token
+     * @param $storeId
      * @return false
      */
-    private function getOrderIdByToken($laybuy, $token)
+    private function getOrderIdByToken($laybuy, $token, $storeId)
     {
         $count = 1;
         while ($count) {
-            $orderId = $laybuy->laybuyConfirm($token);
+            $orderId = $laybuy->laybuyConfirm($token, $storeId);
             if ($orderId) {
                 return $orderId;
             }
@@ -261,11 +263,11 @@ class LaybuyConvertOrder
     public function validateAndCreateInvoiceOrder($orderId, $orderIncrementId, $token)
     {
         try {
-            $orderLaybuyData = $this->laybuy->laybuyCheckOrder($orderIncrementId);
-            if ($orderLaybuyData) {
+            $order = $this->orderRepository->get($orderId);
+            $orderLaybuyData = $this->laybuy->laybuyCheckOrder($orderIncrementId, $order->getStoreId());
+            if ($orderLaybuyData && $order) {
                 $data = json_decode(json_encode($orderLaybuyData), true);
                 if (!isset($data['refunds']) && isset($data['orderId'])) {
-                    $order = $this->orderRepository->get($orderId);
                     $order->setState(Order::STATE_PROCESSING)
                         ->setStatus($this->salesOrderConfig->getStateDefaultStatus(Order::STATE_PROCESSING));
                     $laybuyOrderId = $data['orderId'];
