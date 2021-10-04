@@ -1,0 +1,32 @@
+<?php
+$reportData = $block->getReportData();
+$styleError = 'background: #dec7c7';
+$subStyleError = 'background: #bfeabd';
+$count = 1;
+?>
+
+<div class="error-data-wrapper">
+    <div class="report-data-total"><h3><?= __('Report Data Total: ') . count($reportData) ?></h3></div>
+    <table>
+        <tr style="margin-bottom:5px; <?= $subStyleError ?>">
+            <td style="width: 15%">Cron Status</td>
+            <td style="width: 25%">Message</td>
+            <td style="width: 60%">Detail Log</td>
+        </tr>
+        <?php foreach ($reportData as $data): ?>
+            <?php
+            $count++;
+            if ($count % 2 === 0) {
+                $style = $styleError;
+            } else {
+                $style = $subStyleError;
+            }
+            ?>
+            <tr style="margin-bottom:5px; <?= $style ?>">
+                <td><?= $data['status']? 'Success' : 'Error' ?></td>
+                <td><?= $data['message'] ?></td>
+                <td><?= json_encode($data['data']) ?></td>
+            </tr>
+        <?php endforeach; ?>
+    </table>
+</div>

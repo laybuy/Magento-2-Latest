@@ -6,6 +6,7 @@ use Laybuy\Laybuy\Model\Laybuy;
 use Laybuy\Laybuy\Model\Logger\ConvertQuoteLogger;
 use Laybuy\Laybuy\Model\LaybuyConvertOrder;
 use Magento\Framework\App\ResourceConnection;
+use Laybuy\Laybuy\Model\Email;
 
 /**
  * Class Capture
@@ -28,19 +29,29 @@ class Capture
     protected $laybuyConvertOrder;
 
     /**
+     * @var Email
+     */
+    protected $laybuyEmail;
+
+    private $reportList = [];
+
+    /**
      * Capture constructor.
      * @param ResourceConnection $resource
      * @param ConvertQuoteLogger $logger
      * @param LaybuyConvertOrder $laybuyConvertOrder
+     * @param Email $laybuyEmail
      */
     public function __construct(
         ResourceConnection $resource,
         ConvertQuoteLogger $logger,
-        LaybuyConvertOrder $laybuyConvertOrder
+        LaybuyConvertOrder $laybuyConvertOrder,
+        Email $laybuyEmail
     ) {
         $this->resource = $resource;
         $this->logger = $logger;
         $this->laybuyConvertOrder = $laybuyConvertOrder;
+        $this->laybuyEmail = $laybuyEmail;
     }
 
     /**
@@ -72,12 +83,28 @@ class Capture
                 $quoteId = $quoteData['entity_id'];
                 $quoteInformation = $quoteData['additional_information'];
                 $storeId = $quoteData['store_id'];
-                $this->laybuyConvertOrder->processValidateAndCreateOrder($quoteId, $quoteInformation, $storeId);
+                if ($quoteInformation) {
+                    $this->reportList[] = $this->laybuyConvertOrder->processValidateAndCreateOrder($quoteId, $quoteInformation, $storeId);
+                }
             } catch (\Exception $e) {
                 $this->logger->error('Convert quote to order error',
                     ['quote_id' => $quoteId, 'message' => $e->getMessage(), 'trace' => $e->getTraceAsString()]
                 );
+                $this->reportList[] = [
+                    'status' => false,
+                    'message' => $e->getMessage(),
+                    'data' => [
+                        'quote_id' => $quoteId
+                    ]
+                ];
             }
+        }
+        if (count($this->reportList)) {
+            $reportByStoreList = [];
+            foreach ($this->reportList as $report) {
+                $reportByStoreList[$report['store_id']][] = $report;
+            }
+            $this->laybuyEmail->sendEmailListByStore($reportByStoreList);
         }
     }
 
@@ -107,12 +134,28 @@ class Capture
                 $quoteId = $quoteData['entity_id'];
                 $quoteInformation = $quoteData['additional_information'];
                 $storeId = $quoteData['store_id'];
-                $this->laybuyConvertOrder->processValidateAndCreateOrder($quoteId, $quoteInformation, $storeId);
+                if ($quoteInformation) {
+                    $this->reportList[] = $this->laybuyConvertOrder->processValidateAndCreateOrder($quoteId, $quoteInformation, $storeId);
+                }
             } catch (\Exception $e) {
                 $this->logger->error('Convert quote to order error',
                     ['quote_id' => $quoteId, 'message' => $e->getMessage(), 'trace' => $e->getTraceAsString()]
                 );
+                $this->reportList[] = [
+                    'status' => false,
+                    'message' => $e->getMessage(),
+                    'data' => [
+                        'quote_id' => $quoteId
+                    ]
+                ];
             }
+        }
+        if (count($this->reportList)) {
+            $reportByStoreList = [];
+            foreach ($this->reportList as $report) {
+                $reportByStoreList[$report['store_id']][] = $report;
+            }
+            $this->laybuyEmail->sendEmailListByStore($reportByStoreList);
         }
     }
 }

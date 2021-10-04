@@ -125,25 +125,51 @@ class LaybuyConvertOrder
     public function processValidateAndCreateOrder($quoteId, $quoteInformation, $storeId)
     {
         if ($quoteInformation) {
+            $statusResponse = [];
+            $statusResponse['store_id'] = $storeId;
             $token = json_decode($quoteInformation, true)['Token'];
             $orderId = $this->getOrderIdByToken($this->laybuy, $token, $storeId);
             if ($orderId) {
                 $laybuyOrderDetail = $this->laybuy->laybuyGetOrderById($orderId, $storeId);
                 if ($laybuyOrderDetail && $quote = $this->validateOrderLaybuy($laybuyOrderDetail, $quoteId)) {
-                    $this->createOrder($quote, $orderId, $token);
+                    $magentoOrderId = $this->createOrder($quote, $orderId, $token);
+                    $statusResponse['status'] = true;
+                    $statusResponse['message'] = 'Create Order Success';
+                    $statusResponse['data'] = [
+                        'order_id' => $magentoOrderId,
+                    ];
                 } else {
                     $this->logger->error('Can not create an order', [
                         'quote_id' => $quoteId,
                         'token' => $token
                     ]);
+                    $statusResponse['status'] = false;
+                    $statusResponse['message'] = 'Validate order laybuy error';
+                    $statusResponse['data'] = [
+                        'quote_id' => $quoteId,
+                        'token' => $token,
+                    ];
                 }
             } else {
                 $this->logger->error('Can not get order ID from laybuy', [
                     'quote_id' => $quoteId,
                     'token' => $token
                 ]);
+                $statusResponse['status'] = false;
+                $statusResponse['message'] = 'Can not get order ID from laybuy';
+                $statusResponse['data'] = [
+                    'quote_id' => $quoteId,
+                    'token' => $token,
+                ];
             }
+            return $statusResponse;
         }
+        $statusResponse['status'] = false;
+        $statusResponse['message'] = 'Magento quote information error';
+        $statusResponse['data'] = [
+            'quote_id' => $quoteId,
+        ];
+        return $statusResponse;
     }
 
     /**
@@ -167,6 +193,7 @@ class LaybuyConvertOrder
                 $txnId = $laybuyOrderId . '_' . $token;
                 $this->laybuy->addTransactionId($order, $txnId);
                 $this->laybuy->sendOrderEmail($order);
+                return $order->getEntityId();
             }
 
         } catch (\Exception $e) {
@@ -194,8 +221,6 @@ class LaybuyConvertOrder
                 && (float)$quote->getGrandTotal() === (float)$laybuyOrderDetailArray['amount']) {
                 return $quote;
             }
-            $this->logger->error('Quote not validate',
-                ['quote_id' => $quoteId, 'laybuyOrderDetail' => $laybuyOrderDetail, 'quote_grand_total' => $quote->getGrandTotal(), 'laybuy_total' => $laybuyOrderDetailArray['amount']]);
         } catch (\Exception $e) {
             $this->logger->error('Quote not validate',
                 [
@@ -206,6 +231,8 @@ class LaybuyConvertOrder
                 ]);
             return false;
         }
+        $this->logger->error('Quote not validate',
+            ['quote_id' => $quoteId, 'laybuyOrderDetail' => $laybuyOrderDetail]);
         return false;
     }
 
@@ -235,7 +262,6 @@ class LaybuyConvertOrder
     /**
      * @param $laybuy
      * @param $token
-     * @param $storeId
      * @return false
      */
     private function getOrderIdByToken($laybuy, $token, $storeId)
@@ -258,12 +284,14 @@ class LaybuyConvertOrder
      * @param $orderId
      * @param $orderIncrementId
      * @param $token
-     * @return bool
+     * @return array
      */
     public function validateAndCreateInvoiceOrder($orderId, $orderIncrementId, $token)
     {
         try {
+            $statusResponse = [];
             $order = $this->orderRepository->get($orderId);
+            $statusResponse['store_id'] = $order->getStoreId();
             $orderLaybuyData = $this->laybuy->laybuyCheckOrder($orderIncrementId, $order->getStoreId());
             if ($orderLaybuyData && $order) {
                 $data = json_decode(json_encode($orderLaybuyData), true);
@@ -291,24 +319,50 @@ class LaybuyConvertOrder
                         if ($this->laybuy->getConfigData('send_invoice_to_customer')) {
                             $this->invoiceSender->send($invoice);
                         }
-                        return true;
+                        $statusResponse['status'] = true;
+                        $statusResponse['message'] = 'Create Invoice Success';
+                        $statusResponse['data'] = [
+                            'order_id' => $orderId,
+                            'order_increment_id' => $orderIncrementId
+                        ];
+                        return $statusResponse;
                     } else {
                         $this->logger->error('Magento does not allow order create invoice', [
                             'order_id' => $orderId,
                             'order_can_invoice' => $order->canInvoice(),
                             'payment_method' => $order->getPayment()->getMethod()
                         ]);
+                        $statusResponse['status'] = false;
+                        $statusResponse['message'] = 'Magento does not allow order create invoice';
+                        $statusResponse['data'] = [
+                            'order_id' => $orderId,
+                            'order_increment_id' => $orderIncrementId,
+                        ];
                     }
                 } else {
                     $this->logger->error('Order Laybuy Data not validate for create an invoice', [
                         'order_id' => $orderId,
                         'order_laybuy_data' => $orderLaybuyData
                     ]);
+                    $statusResponse['status'] = false;
+                    $statusResponse['message'] = 'Order Laybuy Data not validate for create an invoice';
+                    $statusResponse['data'] = [
+                        'order_id' => $orderId,
+                        'order_increment_id' => $orderIncrementId,
+                        'order_laybuy_data' => $orderLaybuyData,
+                    ];
                 }
             } else {
                 $this->logger->error('Order Laybuy Data empty, can not create order invoice', [
                     'order_id' => $orderId,
                 ]);
+                $statusResponse['status'] = false;
+                $statusResponse['message'] = 'Order Laybuy Data empty, can not create order invoice';
+                $statusResponse['data'] = [
+                    'order_id' => $orderId,
+                    'order_increment_id' => $orderIncrementId,
+                    'error_message' => 'Order Laybuy Data empty, can not create order invoice'
+                ];
             }
         } catch (\Exception $e) {
             $this->logger->error('Can\'t create order invoice', [
@@ -316,8 +370,15 @@ class LaybuyConvertOrder
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString()
             ]);
+            $statusResponse['status'] = false;
+            $statusResponse['message'] = $e->getMessage();
+            $statusResponse['data'] = [
+                'order_id' => $orderId,
+                'order_increment_id' => $orderIncrementId,
+                'trace' => $e->getTraceAsString()
+            ];
         }
 
-        return false;
+        return $statusResponse;
     }
 }

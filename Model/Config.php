@@ -44,6 +44,14 @@ class Config extends ParentConfig
 
     const KEY_SHOW_FULL_LOGO = 'show_full_logo';
 
+    const ENABLE_CRON_EMAIL_REPORT = 'enable_email_cron_report';
+
+    const PAYMENT_ERROR_EMAIl = 'payment_error_email';
+
+    const EMAIL_TEMPLATE = 'email_template';
+
+    const EMAIL_IDENTITY = 'email_identity';
+
     const API_ENDPOINT_LIVE = 'https://api.laybuy.com';
 
     const API_ENDPOINT_SANDBOX = 'https://sandbox-api.laybuy.com';
@@ -256,5 +264,41 @@ class Config extends ParentConfig
         }
 
         return $this->currentStore;
+    }
+
+    /**
+     * @param $storeId
+     * @return mixed|null
+     */
+    public function enableEmailReport($storeId)
+    {
+        return $this->getValue(self::ENABLE_CRON_EMAIL_REPORT, $storeId);
+    }
+
+    /**
+     * @param $storeId
+     * @return mixed|null
+     */
+    public function getPaymentErrorEmail($storeId)
+    {
+        return $this->getValue(self::PAYMENT_ERROR_EMAIl, $storeId);
+    }
+
+    /**
+     * @param $storeId
+     * @return mixed|null
+     */
+    public function getEmailTemplate($storeId)
+    {
+        return $this->getValue(self::EMAIL_TEMPLATE, $storeId);
+    }
+
+    /**
+     * @param $storeId
+     * @return mixed|null
+     */
+    public function getEmailIdentity($storeId)
+    {
+        return $this->getValue(self::EMAIL_IDENTITY, $storeId);
     }
 }

@@ -6,6 +6,7 @@ use Laybuy\Laybuy\Model\Laybuy;
 use Laybuy\Laybuy\Model\Logger\ConvertQuoteLogger;
 use Laybuy\Laybuy\Model\LaybuyConvertOrder;
 use Magento\Framework\App\ResourceConnection;
+use Laybuy\Laybuy\Model\Email;
 
 /**
  * Class Order
@@ -28,19 +29,29 @@ class Order
     protected $laybuyConvertOrder;
 
     /**
+     * @var Email
+     */
+    protected $laybuyEmail;
+
+    private $reportList = [];
+
+    /**
      * Order constructor.
      * @param ResourceConnection $resource
      * @param ConvertQuoteLogger $logger
      * @param LaybuyConvertOrder $laybuyConvertOrder
+     * @param Email $laybuyEmail
      */
     public function __construct(
         ResourceConnection $resource,
         ConvertQuoteLogger $logger,
-        LaybuyConvertOrder $laybuyConvertOrder
+        LaybuyConvertOrder $laybuyConvertOrder,
+        Email $laybuyEmail
     ) {
         $this->resource = $resource;
         $this->logger = $logger;
         $this->laybuyConvertOrder = $laybuyConvertOrder;
+        $this->laybuyEmail = $laybuyEmail;
     }
 
     /**
@@ -71,7 +82,14 @@ class Order
                     $token = $laybuyData['Token'];
                 }
             }
-            $this->laybuyConvertOrder->validateAndCreateInvoiceOrder($order['entity_id'], $order['increment_id'], $token);
+            $this->reportList[] = $this->laybuyConvertOrder->validateAndCreateInvoiceOrder($order['entity_id'], $order['increment_id'], $token);
+        }
+        if (count($this->reportList)) {
+            $reportByStoreList = [];
+            foreach ($this->reportList as $report) {
+                $reportByStoreList[$report['store_id']][] = $report;
+            }
+            $this->laybuyEmail->sendEmailListByStore($reportByStoreList);
         }
     }
 
@@ -103,7 +121,14 @@ class Order
                     $token = $laybuyData['Token'];
                 }
             }
-            $this->laybuyConvertOrder->validateAndCreateInvoiceOrder($order['entity_id'], $order['increment_id'], $token);
+            $this->reportList[] = $this->laybuyConvertOrder->validateAndCreateInvoiceOrder($order['entity_id'], $order['increment_id'], $token);
+        }
+        if (count($this->reportList)) {
+            $reportByStoreList = [];
+            foreach ($this->reportList as $report) {
+                $reportByStoreList[$report['store_id']][] = $report;
+            }
+            $this->laybuyEmail->sendEmailListByStore($reportByStoreList);
         }
     }
 }

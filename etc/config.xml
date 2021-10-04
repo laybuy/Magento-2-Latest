@@ -26,6 +26,9 @@
                 <show_in_cart_page>1</show_in_cart_page>
                 <show_full_logo>0</show_full_logo>
                 <show_logo_position>right</show_logo_position>
+                <email_template>payment_nz_laybuy_payment_email_template</email_template>
+                <enable_email_cron_report>0</enable_email_cron_report>
+                <email_identity>general</email_identity>
             </laybuy_payment>
         </payment>
     </default>
