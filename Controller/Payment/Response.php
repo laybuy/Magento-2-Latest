@@ -72,6 +72,15 @@ class Response extends Action
     {
         $this->logger->debug([__METHOD__ => 'start']);
 
+        /**
+         * Fix issue with session clear during order email sending.
+         * @see \Magento\PageCache\Model\DepersonalizeChecker::checkIfDepersonalize
+         */
+        $this->getRequest()->setParams(array_merge(
+            $this->getRequest()->getParams(),
+            ['ajax' => 1]
+        ));
+
         $token = $this->getRequest()->getParam('token');
         $laybuyStatus = $this->getRequest()->getParam('status');
         $quote = $this->checkoutSession->getQuote();
