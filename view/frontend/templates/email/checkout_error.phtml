@@ -1,0 +1,20 @@
+<?php
+$logData = $block->getLogData();
+$type = $block->getType();
+$styleError = 'background: #dec7c7';
+$subStyleError = 'background: #bfeabd';
+?>
+<div class="error-data-wrapper">
+    <table>
+        <tr style="margin-bottom:5px; <?= $subStyleError ?>">
+            <td style="width: 30%">Error Message</td>
+            <td style="width: 30%">Addition Log</td>
+            <td style="width: 40%">Response</td>
+        </tr>
+       <tr style="margin-bottom:5px; <?= $styleError ?>">
+            <td><?= $logData['error_message'] ?></td>
+            <td><?= $logData['addition_log'] ?></td>
+            <td><?= $logData['response'] ?></td>
+        </tr>
+    </table>
+</div>

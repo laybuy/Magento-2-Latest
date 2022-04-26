@@ -44,8 +44,7 @@ class Email
         TransportBuilder $transportBuilder,
         Config $config,
         LoggerInterface $logger
-    )
-    {
+    ) {
         $this->storeManager = $storeManager;
         $this->transportBuilder = $transportBuilder;
         $this->config = $config;
@@ -106,5 +105,50 @@ class Email
     public function getEnableEmailReport($storeId)
     {
         return $this->config->enableEmailReport($storeId);
+    }
+
+    /**
+     * @param $logData
+     * @param $storeId
+     */
+    public function sendCheckoutReportEmail($logData, $storeId)
+    {
+        try {
+            if (!$this->enableCheckoutEmailReport($storeId)) {
+                return;
+            }
+            $adminEmail = $this->config->getPaymentErrorEmail($storeId);
+            if (!$adminEmail) {
+                return;
+            }
+            $store = $this->storeManager->getStore($storeId);
+            $transport = $this->transportBuilder->setTemplateIdentifier(
+                $this->config->getEmailCheckoutTemplate($storeId)
+            )->setTemplateOptions(
+                ['area' => Area::AREA_FRONTEND, 'store' => $store->getId()]
+            )->setTemplateVars(
+                [
+                    'store' => $store,
+                    'log_data' => $logData,
+                ]
+            )->setFromByScope(
+                $this->config->getEmailIdentity($storeId),
+                $storeId
+            )->addTo(
+                $adminEmail
+            )->getTransport();
+            $transport->sendMessage();
+        } catch (\Exception $e) {
+            $this->logger->error('Can not send laybuy error report', [$e->getMessage(), $e->getTraceAsString()]);
+        }
+    }
+
+    /**
+     * @param $storeId
+     * @return mixed|null
+     */
+    public function enableCheckoutEmailReport($storeId)
+    {
+        return $this->config->enableCheckoutEmailReport($storeId);
     }
 }

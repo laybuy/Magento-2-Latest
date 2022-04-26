@@ -46,9 +46,13 @@ class Config extends ParentConfig
 
     const ENABLE_CRON_EMAIL_REPORT = 'enable_email_cron_report';
 
+    const ENABLE_CHECKOUT_EMAIL_REPORT = 'enable_email_error';
+
     const PAYMENT_ERROR_EMAIl = 'payment_error_email';
 
     const EMAIL_TEMPLATE = 'email_template';
+
+    const EMAIL_CHECKOUT_TEMPLATE = 'email_checkout_template';
 
     const EMAIL_IDENTITY = 'email_identity';
 
@@ -279,6 +283,15 @@ class Config extends ParentConfig
      * @param $storeId
      * @return mixed|null
      */
+    public function enableCheckoutEmailReport($storeId)
+    {
+        return $this->getValue(self::ENABLE_CHECKOUT_EMAIL_REPORT, $storeId);
+    }
+
+    /**
+     * @param $storeId
+     * @return mixed|null
+     */
     public function getPaymentErrorEmail($storeId)
     {
         return $this->getValue(self::PAYMENT_ERROR_EMAIl, $storeId);
@@ -291,6 +304,15 @@ class Config extends ParentConfig
     public function getEmailTemplate($storeId)
     {
         return $this->getValue(self::EMAIL_TEMPLATE, $storeId);
+    }
+
+    /**
+     * @param $storeId
+     * @return mixed|null
+     */
+    public function getEmailCheckoutTemplate($storeId)
+    {
+        return $this->getValue(self::EMAIL_CHECKOUT_TEMPLATE, $storeId);
     }
 
     /**
