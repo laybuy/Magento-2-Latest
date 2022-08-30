@@ -2,6 +2,7 @@
 
 namespace Laybuy\Laybuy\Model;
 
+use Magento\Framework\Exception\NoSuchEntityException;
 use \Magento\Sales\Model\Order\Payment\Transaction\BuilderInterface;
 use Laybuy\Laybuy\Model\Config as LaybuyConfig;
 
@@ -11,6 +12,8 @@ use Laybuy\Laybuy\Model\Config as LaybuyConfig;
  */
 class Laybuy extends \Magento\Payment\Model\Method\AbstractMethod
 {
+    public $quote;
+
     /**
      * @var \Magento\Store\Model\StoreManagerInterface
      */
@@ -24,7 +27,7 @@ class Laybuy extends \Magento\Payment\Model\Method\AbstractMethod
     /**
      * @var \Magento\Checkout\Model\Session
      */
-    protected $_checkoutSession;
+    protected $checkoutSession;
 
     /**
      * @var \Laybuy\Laybuy\Gateway\Http\LaybuyClient
@@ -77,6 +80,16 @@ class Laybuy extends \Magento\Payment\Model\Method\AbstractMethod
     protected $quoteValidator;
 
     /**
+     * @var \Magento\Quote\Api\CartRepositoryInterface
+     */
+    protected $quoteRepository;
+
+    /**
+     * @var \Magento\Quote\Model\QuoteManagement
+     */
+    protected $quoteManagement;
+
+    /**
      * @var \Magento\Sales\Model\Service\InvoiceService
      */
     protected $invoiceService;
@@ -111,7 +124,25 @@ class Laybuy extends \Magento\Payment\Model\Method\AbstractMethod
      */
     protected $_assetRepo;
 
+    /**
+     * @var \Magento\Catalog\Model\Product
+     */
+    protected $_product;
 
+    /**
+     * @var \Magento\Customer\Model\CustomerFactory
+     */
+    protected $customerFactory;
+
+    /**
+     * @var \Magento\Customer\Api\CustomerRepositoryInterface
+     */
+    protected $customerRepository;
+
+    /**
+     * @var \Magento\Quote\Model\MaskedQuoteIdToQuoteIdInterface
+     */
+    private $maskedQuoteIdToQuoteId;
     /**
      * Laybuy constructor.
      * @param \Magento\Framework\Model\Context $context
@@ -160,9 +191,16 @@ class Laybuy extends \Magento\Payment\Model\Method\AbstractMethod
         \Magento\Sales\Api\TransactionRepositoryInterface $transaction,
         BuilderInterface $transBuilder,
         \Magento\Quote\Model\QuoteValidator $quoteValidator,
+        \Magento\Quote\Api\CartRepositoryInterface $quoteRepository,
+        \Magento\Quote\Model\QuoteManagement $quoteManagement,
+        \Magento\Catalog\Model\Product $product,
+        \Magento\Customer\Model\CustomerFactory $customerFactory,
+        \Magento\Customer\Api\CustomerRepositoryInterface $customerRepository,
+        \Magento\Framework\ObjectManagerInterface $objectmanager,
         \Magento\Framework\View\Asset\Repository $assetRepo,
         \Magento\Framework\Model\ResourceModel\AbstractResource $resource = null,
         \Magento\Framework\Data\Collection\AbstractDb $collection = null,
+        \Magento\Quote\Model\MaskedQuoteIdToQuoteIdInterface $maskedQuoteIdToQuoteId,
         array $data = []
     ) {
         parent::__construct(
@@ -179,11 +217,16 @@ class Laybuy extends \Magento\Payment\Model\Method\AbstractMethod
         );
         $this->_assetRepo = $assetRepo;
         $this->_storeManager = $storeManager;
+        $this->_product = $product;
         $this->_urlBuilder = $urlBuilder;
-        $this->_checkoutSession = $checkoutSession;
+        $this->checkoutSession = $checkoutSession;
         $this->httpClient = $httpClient;
         $this->_exception = $exception;
         $this->quoteValidator = $quoteValidator;
+        $this->quoteRepository = $quoteRepository;
+        $this->quoteManagement = $quoteManagement;
+        $this->customerFactory = $customerFactory;
+        $this->customerRepository = $customerRepository;
         $this->transactionRepository = $transaction;
         $this->transactionBuilder = $transBuilder;
         $this->logger = $logger;
@@ -192,6 +235,8 @@ class Laybuy extends \Magento\Payment\Model\Method\AbstractMethod
         $this->invoiceSender = $invoiceSender;
         $this->transactionFactory = $transactionFactory;
         $this->invoiceService = $invoiceService;
+        $this->_objectManager = $objectmanager;
+        $this->maskedQuoteIdToQuoteId = $maskedQuoteIdToQuoteId;
     }
 
     /**
@@ -202,6 +247,9 @@ class Laybuy extends \Magento\Payment\Model\Method\AbstractMethod
         return Config::CODE;
     }
 
+    public function getQuote() {
+        return $this->quote;
+    }
     /**
      *
      * Path to logo for checkout config
@@ -222,12 +270,12 @@ class Laybuy extends \Magento\Payment\Model\Method\AbstractMethod
      */
     public function isActive($storeId = null)
     {
-        $quote = $this->_checkoutSession->getQuote();
+        $quote = $this->checkoutSession->getQuote();
 
         if (!$quote ||
-            !in_array($quote->getCurrency()->getQuoteCurrencyCode(), $this->_supportedCurrencyCodes) ||
+           // !in_array($quote->getCurrency()->getQuoteCurrencyCode(), $this->_supportedCurrencyCodes) ||
             !$this->httpClient->restClient ||
-            $this->getConfigData('min_order_total') > $quote->getGrandTotal() ||
+            //$this->getConfigData('min_order_total') > $quote->getGrandTotal() ||
             $quote->getGrandTotal() > $this->getConfigData('max_order_total')
         ) {
             return false;
@@ -266,9 +314,22 @@ class Laybuy extends \Magento\Payment\Model\Method\AbstractMethod
      * @param bool|string $guestEmail
      * @return bool|string
      */
-    public function getLaybuyRedirectUrl($guestEmail = false)
+    public function getLaybuyRedirectUrl($guestEmail = false, $fromPWA = false, $maskedCartID = [])
     {
-        $quote = $this->_checkoutSession->getQuote();
+        $quote = $this->checkoutSession->getQuote();
+
+        if ($fromPWA) {
+            try {
+               $quoteId = $this->maskedQuoteIdToQuoteId->execute($maskedCartID);
+                $quote = $this->quoteRepository->get($quoteId);
+                $this->quote = $quote;
+                $billing = $quote->getBillingAddress();
+                $guestEmail = $billing->getEmail();
+
+            } catch (NoSuchEntityException $e) {
+                return $e->getMessage();
+            }
+        }
 
         try {
             $this->validateQuote($quote);
@@ -292,7 +353,7 @@ class Laybuy extends \Magento\Payment\Model\Method\AbstractMethod
 
             $this->quoteValidator->validateBeforeSubmit($quote);
 
-            $laybuyOrder = $this->createLaybuyOrder($quote);
+            $laybuyOrder = $this->createLaybuyOrder($quote, $fromPWA);
             $data = $this->httpClient->getRedirectUrlAndToken($laybuyOrder);
 
             if(!$data || !isset($data['redirectUrl']) || !isset($data['token'])) {
@@ -310,6 +371,7 @@ class Laybuy extends \Magento\Payment\Model\Method\AbstractMethod
 
         } catch (\Exception $e) {
             $this->logger->debug([__METHOD__ . ' ERROR LAYBUY REDIRECT ' . $e->getMessage() . " " => $e->getTraceAsString()]);
+	    return false;
         }
     }
 
@@ -496,9 +558,9 @@ class Laybuy extends \Magento\Payment\Model\Method\AbstractMethod
      * @param \Magento\Quote\Model\Quote $quote
      * @return \stdClass
      */
-    protected function createLaybuyOrder(\Magento\Quote\Model\Quote $quote)
+    protected function createLaybuyOrder(\Magento\Quote\Model\Quote $quote, $fromPWA)
     {
-        $returnUrl = $this->_urlBuilder->getUrl('laybuy/payment/response');
+        $returnUrl = $this->_urlBuilder->getUrl('laybuy/payment/response/');
 
         $address = $quote->getBillingAddress();
         $shAddress = $quote->getShippingAddress();
@@ -521,7 +583,12 @@ class Laybuy extends \Magento\Payment\Model\Method\AbstractMethod
             throw new \LogicException('Laybuy doesn\'t support your currency');
         }
 
+
         $laybuyOrder->returnUrl = $returnUrl;
+
+        if ($fromPWA) {
+            $laybuyOrder->returnUrl = $returnUrl . '?qID='.$quote->getId();
+        }
 
         $laybuyOrder->merchantReference = $quote->getReservedOrderId();
 

@@ -1,0 +1,14 @@
+
+type Query {
+    getLayBuyData(email: String, cartId: String!) : [laybuydata] @resolver( class: "Laybuy\\Laybuy\\Model\\Resolver\\LaybuyData") @doc(description: "Get Redirect Url For LayBuy")
+    getOrderData(cartId: String!) : [getOrder] @resolver( class: "Laybuy\\Laybuy\\Model\\Resolver\\OrderData") @doc(description: "Get Order Data")
+}
+
+type laybuydata {
+    success : Boolean  @doc(description: "Is request success or not"),
+    redirect_url : String  @doc(description: "LayBuy Redirect Url with token")
+}
+
+type getOrder {
+    order: Order
+}
