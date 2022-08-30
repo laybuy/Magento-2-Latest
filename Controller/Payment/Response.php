@@ -10,6 +10,7 @@ use Laybuy\Laybuy\Model\LaybuyFactory;
 use Magento\Quote\Api\CartManagementInterface;
 use Magento\Checkout\Model\Session as CheckoutSession;
 use Laybuy\Laybuy\Model\Logger\Logger;
+use \Magento\Checkout\Model\Cart;
 
 class Response extends Action
 {
@@ -20,10 +21,14 @@ class Response extends Action
     protected $checkoutSession;
 
     /**
+     * @var \Magento\Quote\Api\CartRepositoryInterface
+     */
+    protected $quoteRepository;
+
+    /**
      * @var \Laybuy\Laybuy\Model\Laybuy
      */
     protected $laybuy;
-
     /**
      * @var Logger
      */
@@ -33,7 +38,7 @@ class Response extends Action
      * @var CartManagementInterface
      */
     protected $cartManagement;
-
+    protected $orderRepository;
     /**
      * Response constructor.
      * @param Logger $logger
@@ -44,15 +49,19 @@ class Response extends Action
      */
     public function __construct(
         Logger $logger,
-        LaybuyFactory $laybuyFactory,
+        Laybuy $laybuy,
         CheckoutSession $checkoutSession,
+        \Magento\Quote\Api\CartRepositoryInterface $quoteRepository,
         CartManagementInterface $cartManagement,
-        Context $context
+        Context $context,
+        \Magento\Sales\Api\OrderRepositoryInterface $orderRepository
     ) {
         $this->logger = $logger;
-        $this->laybuy = $laybuyFactory->create();
+        $this->laybuy = $laybuy;
         $this->checkoutSession = $checkoutSession;
+        $this->quoteRepository = $quoteRepository;
         $this->cartManagement = $cartManagement;
+        $this->orderRepository = $orderRepository;
         parent::__construct($context);
     }
 
@@ -63,18 +72,16 @@ class Response extends Action
     {
         $this->logger->debug([__METHOD__ => 'start']);
 
-        /**
-         * Fix issue with session clear during order email sending.
-         * @see \Magento\PageCache\Model\DepersonalizeChecker::checkIfDepersonalize
-         */
-        $this->getRequest()->setParams(array_merge(
-            $this->getRequest()->getParams(),
-            ['ajax' => 1]
-        ));
-
         $token = $this->getRequest()->getParam('token');
         $laybuyStatus = $this->getRequest()->getParam('status');
+        $quoteId = $this->getRequest()->getParam('qID');
+        $fromPWA = false;
         $quote = $this->checkoutSession->getQuote();
+        if (!empty($quoteId)) {
+            $quote = $this->quoteRepository->get($quoteId);
+            $fromPWA = true;
+        }
+
         $merchantReference = $quote->getReservedOrderId();
 
         try {
@@ -87,12 +94,12 @@ class Response extends Action
                             $quote->getPayment()->unsAdditionalInformation('Token', $token);
                         }
 
-                        $this->checkoutSession
+                            $this->checkoutSession
                             ->setLastQuoteId($quote->getId())
                             ->setLastSuccessQuoteId($quote->getId())
                             ->clearHelperData();
 
-                        
+
                         $quote->collectTotals();
                         $this->logger->debug([
                             'Quote ID:' => $quote->getId(),
@@ -100,9 +107,14 @@ class Response extends Action
                             'Laybuy Order ID:' => $laybuyOrderId,
                             'Payment ID:' => $quote->getPayment()->getId()
                         ]);
+
                         $orderId = $this->cartManagement->placeOrder($quote->getId());
 
                         $order = $this->checkoutSession->getLastRealOrder();
+
+                        if($fromPWA) {
+                            $order = $this->orderRepository->get($orderId);
+                        }
 
                         if ($orderId && $order) {
 
@@ -114,6 +126,10 @@ class Response extends Action
                                 'Order created' => $order->getId(),
                                 'Laybuy order' => $laybuyOrderId
                             ]);
+
+                            if ($fromPWA) {
+                                return $this->_redirect('checkout', ['_secure' => true]);
+                            }
 
                             return $this->_redirect('checkout/onepage/success', ['_secure' => true]);
                         }
@@ -132,13 +148,22 @@ class Response extends Action
                         $this->messageManager->addErrorMessage($message);
                     }
                     $this->laybuy->laybuyCancel($token);
-
-                    return $this->_redirect('checkout/cart', ['_secure' => true]);
+                    if ($fromPWA) {
+                        return $this->_redirect('cart', ['_secure' => true]);
+                    } else {
+                        return $this->_redirect('checkout/cart', ['_secure' => true]);
+                    }
                 }
 
 
             } else {
+
                 $order = $this->checkoutSession->getLastRealOrder();
+
+                if($fromPWA) {
+                    $orderId = $this->cartManagement->placeOrder($quote->getId());
+                    $order = $this->orderRepository->get($orderId);
+                }
 
                 $laybuyStatus = strtoupper($this->getRequest()->getParam('status'));
                 $token = $this->getRequest()->getParam('token');
@@ -154,6 +179,11 @@ class Response extends Action
                                 'Order Successfully Updated' => $order->getId(),
                                 'Laybuy order' => $laybuyOrderId
                             ]);
+
+                            if($fromPWA) {
+                                return $this->_redirect('https://magento-pwa.staging.overdose.digital/laybuyOrderComplete/'.$orderId, ['_secure' => true]);
+                            }
+
                             return $this->_redirect('checkout/onepage/success', ['_secure' => true]);
                         } else {
                             $this->logger->debug([
