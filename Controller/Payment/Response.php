@@ -72,6 +72,16 @@ class Response extends Action
     {
         $this->logger->debug([__METHOD__ => 'start']);
 
+        /**
+         * Fix issue with session clear during order email sending.
+         * @see \Magento\PageCache\Model\DepersonalizeChecker::checkIfDepersonalize
+         */
+        $this->getRequest()->setParams(array_merge(
+            $this->getRequest()->getParams(),
+            ['ajax' => 1]
+        ));
+
+
         $token = $this->getRequest()->getParam('token');
         $laybuyStatus = $this->getRequest()->getParam('status');
         $quoteId = $this->getRequest()->getParam('qID');
@@ -181,7 +191,7 @@ class Response extends Action
                             ]);
 
                             if($fromPWA) {
-                                return $this->_redirect('https://magento-pwa.staging.overdose.digital/laybuyOrderComplete/'.$orderId, ['_secure' => true]);
+                                return $this->_redirect('checkout/', ['_secure' => true]);
                             }
 
                             return $this->_redirect('checkout/onepage/success', ['_secure' => true]);
@@ -208,7 +218,9 @@ class Response extends Action
                     if ($order->canCancel()) {
                         $order->cancel();
                     }
-
+                    if ($fromPWA) {
+                        return $this->_redirect('cart', ['_secure' => true]);
+                    }
                     return $this->_redirect('checkout/cart', ['_secure' => true]);
 
                 }
@@ -228,10 +240,14 @@ class Response extends Action
             if($laybuyOrder = $this->laybuy->laybuyCheckOrder($merchantReference)) {
                 $this->laybuy->refundLaybuy($laybuyOrder->orderId, $laybuyOrder->amount, $quote->getStoreId());
             }
-
+            if ($fromPWA) {
+                return $this->_redirect('cart', ['_secure' => true]);
+            }
             return $this->_redirect('checkout/cart', ['_secure' => true]);
         }
-
+        if ($fromPWA) {
+            return $this->_redirect('cart', ['_secure' => true]);
+        }
         return $this->_redirect('checkout/cart', ['_secure' => true]);
     }
 }
