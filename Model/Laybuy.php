@@ -5,6 +5,7 @@ namespace Laybuy\Laybuy\Model;
 use Magento\Framework\Exception\NoSuchEntityException;
 use \Magento\Sales\Model\Order\Payment\Transaction\BuilderInterface;
 use Laybuy\Laybuy\Model\Config as LaybuyConfig;
+use Magento\Quote\Model\MaskedQuoteIdToQuoteIdInterface;
 
 /**
  * Class Laybuy
@@ -200,7 +201,6 @@ class Laybuy extends \Magento\Payment\Model\Method\AbstractMethod
         \Magento\Framework\View\Asset\Repository $assetRepo,
         \Magento\Framework\Model\ResourceModel\AbstractResource $resource = null,
         \Magento\Framework\Data\Collection\AbstractDb $collection = null,
-        \Magento\Quote\Model\MaskedQuoteIdToQuoteIdInterface $maskedQuoteIdToQuoteId,
         array $data = []
     ) {
         parent::__construct(
@@ -236,7 +236,7 @@ class Laybuy extends \Magento\Payment\Model\Method\AbstractMethod
         $this->transactionFactory = $transactionFactory;
         $this->invoiceService = $invoiceService;
         $this->_objectManager = $objectmanager;
-        $this->maskedQuoteIdToQuoteId = $maskedQuoteIdToQuoteId;
+        $this->maskedQuoteIdToQuoteId = $this->_objectManager->create(MaskedQuoteIdToQuoteIdInterface::class);
     }
 
     /**
