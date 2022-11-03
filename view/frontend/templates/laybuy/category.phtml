@@ -7,25 +7,17 @@
     <div style="display:none;">
         <div class="laybuy-installments laybuy-installments-amount"><span class="installments-amount"></span>
             <img src="<?php echo $block->getLogo(); ?>"/>
-            <a class="laybuy-modal-popup-trigger" href="#"><span class="icon icon-info"></span></a>
-        </div>
-    </div>
-    <div id="laybuy-modal-popup">
-        <div class="laybuy-content-wrapper">
-            <iframe src="<?php echo $block->getPopUpUrl(); ?>"></iframe>
         </div>
     </div>
     <script>
         require(
             [
                 'jquery',
-                'Magento_Catalog/js/price-utils',
-                'Magento_Ui/js/modal/modal'
+                'Magento_Catalog/js/price-utils'
             ],
             function(
                 $,
-                utils,
-                modal
+                utils
             ) {
 
                 var laybuy = $('.laybuy-installments.laybuy-installments-amount').clone();
@@ -40,7 +32,7 @@
                 });
 
                 function priceUpdate(element)
-                {   
+                {
                     var min_order = '<?php echo $block->getMinOrderTotal(); ?>';
                     var product_id = $(element).data('product-id');
                     var product = document.getElementById('product-price-'+product_id);
@@ -61,7 +53,7 @@
                         if($('.minimal-price',element).length) {
                             product = $('.minimal-price',element)[0];
                         }
-                        
+
                     }
 
                     if(!bundle)
@@ -71,7 +63,7 @@
                             val = parseFloat(el.replace(',', ''));
                             if(val) {
                                 price = utils.formatPrice(val/6, {decimalSymbol:'.'});
-                            } 
+                            }
 
                             if(val == 0) {
                                 $('.laybuy-installments-amount',element).remove();
@@ -85,23 +77,8 @@
 
                         $('.laybuy-installments-amount span.installments-amount strong',element).prepend(currency);
                     }
-                    
+
                 }
-
-                var options = {
-                    type: 'popup',
-                    responsive: true,
-                    innerScroll: false,
-                    clickableOverlay: true,
-                    modalClass: 'laybuy-learn-more',
-                    buttons: []
-                };
-
-                var popup = modal(options, $('#laybuy-modal-popup'));
-
-                $( ".laybuy-modal-popup-trigger" ).on( "click", function() {
-                    $('#laybuy-modal-popup').modal('openModal');
-                });
             }
         );
     </script>

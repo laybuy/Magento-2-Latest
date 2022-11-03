@@ -124,16 +124,6 @@ class Installments extends Template
     }
 
     /**
-     * Get URL for Laybuy Popup
-     *
-     * @return string
-     */
-    public function getPopUpUrl()
-    {
-        return 'https://popup.laybuy.com/';
-    }
-
-    /**
      * Returns Laybuy installments amount for product
      *
      * @return string

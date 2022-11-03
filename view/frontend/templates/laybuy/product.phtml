@@ -12,24 +12,16 @@
             <span class="installments-amount"><?php echo __('or 6 interest-free payments of <strong>%1</strong> with', $block->getInstallmentCurrency().number_format($block->getProductPrice()[0] / 6, 2).' - '.$block->getInstallmentCurrency().number_format($block->getProductPrice()[1] / 6, 2))?></span>
         <?php endif; ?>
         <img src="<?php echo $block->getLogo(); ?>"/>
-        <a class="laybuy-modal-popup-trigger" href="#"><span class="icon icon-info"></span></a>
-    </div>
-    <div id="laybuy-modal-popup">
-        <div class="laybuy-content-wrapper">
-            <iframe src="<?php echo $block->getPopUpUrl(); ?>"></iframe>
-        </div>
     </div>
     <script>
         require(
             [
                 'jquery',
-                'Magento_Catalog/js/price-utils',
-                'Magento_Ui/js/modal/modal'
+                'Magento_Catalog/js/price-utils'
             ],
             function(
                 $,
-                utils,
-                modal
+                utils
             ) {
                 <?php if($block->getType() == 'bundle'): ?>
                     var laybuy = $('.laybuy-installments.laybuy-installments-amount').clone().attr('style', '');
@@ -56,22 +48,6 @@
                         }
                     })
                 });
-
-
-                var options = {
-                    type: 'popup',
-                    responsive: true,
-                    innerScroll: false,
-                    clickableOverlay: true,
-                    modalClass: 'laybuy-learn-more',
-                    buttons: []
-                };
-
-                var popup = modal(options, $('#laybuy-modal-popup'));
-
-                $( ".laybuy-modal-popup-trigger" ).on( "click", function() {
-                    $('#laybuy-modal-popup').modal('openModal');
-                });
             }
         );
     </script>
@@ -79,25 +55,17 @@
         <div style="display:none;">
             <div class="laybuy-installments laybuy-installments-amount"><span class="installments-amount"></span>
                 <img src="<?php echo $block->getLogo(); ?>"/>
-                <a class="laybuy-modal-popup-trigger" href="#"><span class="icon icon-info"></span></a>
-            </div>
-        </div>
-        <div id="laybuy-modal-popup">
-            <div class="laybuy-content-wrapper">
-                <iframe src="<?php echo $block->getPopUpUrl(); ?>"></iframe>
             </div>
         </div>
         <script>
         require(
             [
                 'jquery',
-                'Magento_Catalog/js/price-utils',
-                'Magento_Ui/js/modal/modal'
+                'Magento_Catalog/js/price-utils'
             ],
             function(
                 $,
-                utils,
-                modal
+                utils
             ) {
 
                 var priceBoxes = $('.table-wrapper.grouped .price-box.price-final_price');
@@ -114,24 +82,8 @@
                         console.log(val = parseFloat(el.replace(',', '')));
                         if(val = parseFloat(el.replace(',', ''))) {
                             $('.laybuy-installments-amount span.installments-amount',element).html('or 6 interest free payments of <strong>'+utils.formatPrice(val/6, {decimalSymbol:'.'})+'</strong> with ');
-                        } 
+                        }
                     });
-                });
-
-
-                var options = {
-                    type: 'popup',
-                    responsive: true,
-                    innerScroll: false,
-                    clickableOverlay: true,
-                    modalClass: 'laybuy-learn-more',
-                    buttons: []
-                };
-
-                var popup = modal(options, $('#laybuy-modal-popup'));
-
-                $( ".laybuy-modal-popup-trigger" ).on( "click", function() {
-                    $('#laybuy-modal-popup').modal('openModal');
                 });
             }
         );
