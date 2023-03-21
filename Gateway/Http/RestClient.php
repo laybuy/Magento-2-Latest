@@ -2,6 +2,10 @@
 
 namespace Laybuy\Laybuy\Gateway\Http;
 
+use Magento\Framework\HTTP\Client\Curl;
+use Laminas\Http\Client;
+use Laminas\Uri\Http;
+
 /**
  * Class RestClient
  * @package Laybuy\Laybuy\Gateway\Http
@@ -19,44 +23,59 @@ class RestClient
     protected $_uri = null;
 
     /**
-     * @var null|\Zend_Http_Client
+     * @var Curl
      */
-    protected static $_httpClient = null;
+    protected $curl;
 
     /**
-     * Flag indicating the Zend_Http_Client is fresh and needs no reset.
-     * Must be set explicitly if you want to keep preset parameters.
-     * @var bool true if you do not want a reset. Default false.
+     * @var
      */
+    protected $auth;
+
+    protected static $_httpClient = null;
+
     protected $_noReset = false;
 
-    public function __construct($uri = null)
+    /**
+     * @param Curl $curl
+     * @param $uri
+     */
+    public function __construct(Curl $curl, $uri = null)
     {
-        if(!empty($uri)) {
+        $this->curl = $curl;
+        if (!empty($uri)) {
             $this->setUri($uri);
         }
     }
 
     /**
+     * @param $user
+     * @param $pass
+     * @return void
+     */
+    public function setAuth($user, $pass)
+    {
+        $this->curl->setCredentials($user, $pass);
+    }
+
+    /**
      * @param $uri
      * @return $this
-     * @throws \Zend_Uri_Exception
      */
     public function setUri($uri)
     {
-        if ($uri instanceof \Zend_Uri_Http) {
+        if ($uri instanceof Http) {
             $this->_uri = $uri;
         } else {
-            $this->_uri = \Zend_Uri::factory($uri);
+            $this->_uri = new Http($uri);
         }
-
         return $this;
     }
 
     /**
-     * @param \Zend_Http_Client $httpClient
+     * @param Client $httpClient
      */
-    final public static function setHttpClient(\Zend_Http_Client $httpClient)
+    final public static function setHttpClient(\Laminas\Http\Client $httpClient)
     {
         self::$_httpClient = $httpClient;
     }
@@ -64,12 +83,12 @@ class RestClient
     /**
      * Gets the HTTP client object.
      *
-     * @return \Zend_Http_Client
+     * @return Client
      */
     final public static function getHttpClient()
     {
-        if (!self::$_httpClient instanceof \Zend_Http_Client) {
-            self::$_httpClient = new \Zend_Http_Client();
+        if (!self::$_httpClient instanceof Client) {
+            self::$_httpClient = new Client();
         }
 
         return self::$_httpClient;
@@ -86,24 +105,20 @@ class RestClient
     /**
      * @param $path
      * @throws \Exception
-     * @throws \Zend_Http_Client_Exception
-     * @throws \Zend_Uri_Exception
      */
     private function _prepareRest($path)
     {
         // Get the URI object and configure it
-        if (!$this->_uri instanceof \Zend_Uri_Http) {
+        if (!$this->_uri instanceof Http) {
             throw new \Exception('URI object must be set before performing call');
         }
 
-        $uri = $this->_uri->getUri();
+        $uri = $this->_uri->toString();
 
         if ($path[0] != '/' && $uri[strlen($uri)-1] != '/') {
             $path = '/' . $path;
         }
-
         $this->_uri->setPath($path);
-
         /**
          * Get the HTTP client and configure it for the endpoint URI.  Do this each time
          * because the Zend_Http_Client instance is shared among all Zend_Service_Abstract subclasses.
@@ -127,80 +142,44 @@ class RestClient
         $this->_noReset = $bool;
     }
 
-
     /**
      * @param $path
      * @param array|null $query
-     * @return \Zend_Http_Response
-     * @throws \Exception
-     * @throws \Zend_Http_Client_Exception
-     * @throws \Zend_Uri_Exception
+     * @return mixed
      */
     public function restGet($path, array $query = null)
     {
         $this->_prepareRest($path);
-        $client = self::getHttpClient();
-        $client->setParameterGet($query);
-        return $client->request('GET');
+        $endPoint = $this->_uri->toString();
+        $this->curl->addHeader("accept", "application/json");
+        $this->curl->get($endPoint);
+        $result = $this->curl->getBody();
+        return json_decode($result);
     }
 
-
     /**
-     * @param $method
-     * @param null $data
-     * @return \Zend_Http_Response
-     * @throws \Zend_Http_Client_Exception
+     * @param $data
+     * @return mixed
      */
-    protected function _performPost($method, $data = null)
+    protected function _performPost($data = null)
     {
-        $client = self::getHttpClient();
-        if (is_string($data)) {
-            $client->setRawData($data);
-        } elseif (is_array($data) || is_object($data)) {
-            $client->setParameterPost((array) $data);
-        }
-        return $client->request($method);
+        $endPoint = $this->_uri->toString();
+        $this->curl->addHeader("accept","application/json");
+        $this->curl->addHeader("Content-Type", "application/json");
+        $this->curl->post($endPoint, $data);
+        $result = $this->curl->getBody();
+        return json_decode($result);
     }
 
     /**
      * @param $path
-     * @param null $data
-     * @return \Zend_Http_Response
+     * @param $data
+     * @return mixed
      * @throws \Exception
-     * @throws \Zend_Http_Client_Exception
-     * @throws \Zend_Uri_Exception
      */
     public function restPost($path, $data = null)
     {
         $this->_prepareRest($path);
-        return $this->_performPost('POST', $data);
-    }
-
-    /**
-     * @param $path
-     * @param null $data
-     * @return \Zend_Http_Response
-     * @throws \Exception
-     * @throws \Zend_Http_Client_Exception
-     * @throws \Zend_Uri_Exception
-     */
-    public function restPut($path, $data = null)
-    {
-        $this->_prepareRest($path);
-        return $this->_performPost('PUT', $data);
-    }
-
-    /**
-     * @param $path
-     * @param null $data
-     * @return \Zend_Http_Response
-     * @throws \Exception
-     * @throws \Zend_Http_Client_Exception
-     * @throws \Zend_Uri_Exception
-     */
-    public function restDelete($path, $data = null)
-    {
-        $this->_prepareRest($path);
-        return $this->_performPost('DELETE', $data);
+        return $this->_performPost($data);
     }
 }

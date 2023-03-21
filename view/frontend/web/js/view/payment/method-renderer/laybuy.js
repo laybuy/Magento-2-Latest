@@ -74,12 +74,12 @@ define([
                 data: {
                     "guest-email": quote.guestEmail
                 }
-            }).success(function(data) {
+            }).done(function(data) {
                 if (data.success) {
                     redirectUrl = data.redirect_url;
 
                     if (window.checkoutConfig.payment['laybuy_payment'].paymentAction == 'authorize_capture') {
-                        setBillingAddressAction(globalMessageList).success(function() {
+                        setBillingAddressAction(globalMessageList).done(function() {
                             $.mage.redirect(redirectUrl);
                         })
                     } else {

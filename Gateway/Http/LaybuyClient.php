@@ -28,7 +28,7 @@ class LaybuyClient
     private $apiKey;
 
     /**
-     * @var \Zend_Rest_Client
+     * @var RestClient
      */
     public $restClient;
 
@@ -43,17 +43,18 @@ class LaybuyClient
     protected $config;
 
     /**
-     * LaybuyClient constructor.
-     *
      * @param Logger $logger
      * @param Config $config
+     * @param RestClient $restClient
      */
     public function __construct(
         Logger $logger,
-        Config $config
+        Config $config,
+        RestClient $restClient
     ) {
         $this->logger = $logger;
         $this->config = $config;
+        $this->restClient = $restClient;
         $this->setupLaybuyClient($config);
     }
 
@@ -68,8 +69,7 @@ class LaybuyClient
             return false;
         }
 
-        $response = $this->restClient->restPost(Config::API_ORDER_CREATE, json_encode($laybuyOrder));
-        $body = json_decode($response->getBody());
+        $body = $this->restClient->restPost(Config::API_ORDER_CREATE, json_encode($laybuyOrder));
         $returnData = [];
         $this->logger->debug([__METHOD__ => $body]);
 
@@ -96,8 +96,7 @@ class LaybuyClient
             return false;
         }
 
-        $response = $this->restClient->restPost(Config::API_ORDER_CONFIRM, json_encode(['token' => $token]));
-        $body = json_decode($response->getBody());
+        $body = $this->restClient->restPost(Config::API_ORDER_CONFIRM, json_encode(['token' => $token]));
 
         $this->logger->debug(['method' => __METHOD__, $token => $body]);
 
@@ -118,8 +117,7 @@ class LaybuyClient
      */
     public function cancelLaybuyOrder($token)
     {
-        $response = $this->restClient->restGet(Config::API_ORDER_CANCEL . '/' . $token);
-        $body = json_decode($response->getBody());
+        $body = $this->restClient->restGet(Config::API_ORDER_CANCEL . '/' . $token);
 
         if ($body->result == Config::LAYBUY_SUCCESS) {
             return true;
@@ -148,9 +146,8 @@ class LaybuyClient
         $this->apiKey = $config->getApiKey();
 
         try {
-            $this->restClient = new RestClient($this->endpoint);
-            $this->restClient->getHttpClient()->setAuth($this->merchantId, $this->apiKey,
-                \Zend_Http_Client::AUTH_BASIC);
+            $this->restClient->setUri($this->endpoint);
+            $this->restClient->setAuth($this->merchantId, $this->apiKey);
         } catch (\Exception $e) {
             $this->restClient = false;
         }
@@ -166,9 +163,7 @@ class LaybuyClient
         $this->config->setCurrentStore($storeId);
         $this->setupLaybuyClient($this->config);
 
-        $response = $this->restClient->restPost(Config::API_ORDER_REFUND, json_encode($refundDetails));
-
-        $body = json_decode($response->getBody());
+        $body = $this->restClient->restPost(Config::API_ORDER_REFUND, json_encode($refundDetails));
 
         $this->logger->debug([
             'Refund Response:' => $body,
@@ -176,7 +171,7 @@ class LaybuyClient
         ]);
 
         if ($body->result === Config::LAYBUY_FAILURE) {
-            $this->logger->debug(['Error while processing refund: ' . $response->getBody()]);
+            $this->logger->debug(['Error while processing refund: ' . json_encode($body)]);
             throw new LocalizedException(__('Unable to process refund.'));
         }
 
@@ -193,8 +188,7 @@ class LaybuyClient
             return false;
         }
 
-        $response = $this->restClient->restGet(Config::API_ORDER_CHECK . '/' . $merchantReference);
-        $body = json_decode($response->getBody());
+        $body = $this->restClient->restGet(Config::API_ORDER_CHECK . '/' . $merchantReference);
 
         $this->logger->debug(['method' => __METHOD__, 'Response' => $body]);
 
