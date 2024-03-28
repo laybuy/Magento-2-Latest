@@ -4,8 +4,10 @@
  */
 ?>
 <?php if ($block->canShow() && $block->showIn('cart')) : ?>
-    <div class="laybuy-installments laybuy-installments-amount"><span class="installments-amount"><?php echo __('or 6 interest-free payments of <strong>%1</strong> with', $block->getCartInstallmentAmount())?></span>
+    <div class="laybuy-installments laybuy-installments-amount"><span class="installments-amount"><?php echo __('or 6 interest-free payments of <strong>%1</strong>', $block->getCartInstallmentAmount())?></span>
         <img src="<?php echo $block->getLogo(); ?>"/>
+        <a href="https://popup.laybuy.com" onclick="return !window.open(this.href, 'Laybuy', 'width=405,height=620')"
+           target="_blank">Learn more</a>
     </div>
     <script>
         require(
@@ -21,7 +23,7 @@
                     e.target.innerText.match(/[0-9 , \.]+/g).some(function(el) {
                         let val;
                         if(val = parseFloat(el.replace(',', ''))) {
-                            $('.laybuy-installments-amount span.installments-amount').html('or 6 interest free payments of <strong>'+ utils.formatPrice(val/6, {}) +'</strong> with');
+                            $('.laybuy-installments-amount span.installments-amount').html('or 6 interest free payments of <strong>'+ utils.formatPrice(val/6, {}) +'</strong>');
                             return;
                         }
                     });

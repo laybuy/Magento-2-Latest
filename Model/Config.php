@@ -68,11 +68,9 @@ class Config extends ParentConfig
 
     const SUPPORTED_CURRENCY_CODES = ['NZD', 'AUD', 'GBP', 'USD'];
 
-    const FULL_LOGO = 'logo/full.svg';
+    const FULL_LOGO = 'laybuy_badge_neon_grape.svg';
 
-    const SMALL_LOGO = 'logo/small.svg';
-
-    const ASSET_URL = 'https://integration-assets.laybuy.com/magento1_laybuy/';
+    const ASSET_URL = 'https://integration-assets.laybuy.com/price-breakdown/';
 
     /**
      * @var EncryptorInterface
@@ -155,12 +153,7 @@ class Config extends ParentConfig
      */
     public function getLogo()
     {
-        if((bool)$this->getValue(self::KEY_SHOW_FULL_LOGO, $this->getCurrentStore())){
-            return self::FULL_LOGO;
-        } else {
-            return self::SMALL_LOGO;
-        }
-
+        return self::FULL_LOGO;
     }
 
     /**
