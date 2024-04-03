@@ -7,11 +7,13 @@
     <?php if($block->getType() != 'grouped'): ?>
     <div class="laybuy-installments laybuy-installments-amount" <?php if($block->getType() == 'bundle'): echo 'style="display:none;"'; endif; ?>>
         <?php if($block->getType() != 'bundle'): ?>
-            <span class="installments-amount"><?php echo __('or 6 interest-free payments of <strong>%1</strong> with', $block->getInstallmentsAmount())?></span>
+            <span class="installments-amount"><?php echo __('or 6 interest-free payments of <strong>%1</strong>', $block->getInstallmentsAmount())?></span>
         <?php else: ?>
-            <span class="installments-amount"><?php echo __('or 6 interest-free payments of <strong>%1</strong> with', $block->getInstallmentCurrency().number_format($block->getProductPrice()[0] / 6, 2).' - '.$block->getInstallmentCurrency().number_format($block->getProductPrice()[1] / 6, 2))?></span>
+            <span class="installments-amount"><?php echo __('or 6 interest-free payments of <strong>%1</strong>', $block->getInstallmentCurrency().number_format($block->getProductPrice()[0] / 6, 2).' - '.$block->getInstallmentCurrency().number_format($block->getProductPrice()[1] / 6, 2))?></span>
         <?php endif; ?>
         <img src="<?php echo $block->getLogo(); ?>"/>
+        <a href="https://popup.laybuy.com" onclick="return !window.open(this.href, 'Laybuy', 'width=405,height=620')"
+           target="_blank">Learn more</a>
     </div>
     <script>
         require(
